@@ -9,17 +9,22 @@ This repository is composed of the following hardening stages:
 *   [gcp-constraint-workforce-pool](./gcp-constraint-workforce-pool): Applies an Organization Policy to restrict which IAM roles can be granted to Workforce Identity Pools.
 *   [gcp-compliance-hipaa](./gcp-compliance-hipaa): Provides a starting point for HIPAA compliance by configuring audit logs, project creation enforcers, and security alerts.
 
-### **FEATURE: Compliance Express**
+## Features
 
-**Prefix:** `gcp-compliance` Delivers ultra-fast, frictionless compliance. By deploying comprehensive security measures in a single run, this feature removes barriers to adoption and ensures rapid adherence to strict regulatory requirements.
+### Foundations
+**Prefix:** `gcp-foundation`
 
-### **FEATURE: Accelerated Foundation Provisioning**
+Serves as the toolkit’s cornerstone by rapidly deploying essential security baselines. It automatically provisions core controls, including IAM engineering standards, Organization Policies, Security Command Center (SCC) enablement, and log sinks.
 
-**Prefix:** `gcp-foundation` Serves as the toolkit’s cornerstone by rapidly deploying essential security baselines. It automatically provisions core controls, including IAM engineering standards, Organization Policies, Security Command Center (SCC) enablement, and log sinks.
+### Compliance
+**Prefix:** `gcp-compliance`
 
-### **FEATURE: Strict Environment Lockdown**
+Delivers ultra-fast, frictionless compliance. By deploying comprehensive security measures in a single run, this feature removes barriers to adoption and ensures rapid adherence to strict regulatory requirements.
 
-**Prefix:** `gcp-constraint` Secures the environment against lateral movement by enforcing advanced hardening constraints. It restricts critical operations, such as blocking the creation of new service accounts and freezing changes to Workforce Identity Pools.
+### Constraints
+**Prefix:** `gcp-constraint`
+
+Secures the environment against lateral movement by enforcing advanced hardening constraints. It restricts critical operations, such as blocking the creation of new service accounts and freezing changes to Workforce Identity Pools.
 
 ## Usage
 
