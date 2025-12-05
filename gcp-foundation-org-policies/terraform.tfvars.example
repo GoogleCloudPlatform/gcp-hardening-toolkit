@@ -1,0 +1,23 @@
+
+# This is an example of a .tfvars file.
+#
+# You can use this file to override the default values of the variables.
+#
+# To use this file, rename it to terraform.tfvars and replace the values
+# with your own.
+
+# parent_folder   = "your-folder-id"
+
+# create_access_context_manager_access_policy = true
+
+# allowed_external_ips = ["projects/PROJECT_ID/zones/ZONE/instances/INSTANCE"]
+
+organization_id = "0123456789"
+
+domains_to_allow = ["example.com"]
+
+essential_contacts_domains_to_allow = ["@example.com"]
+
+allowed_resource_locations = ["us-east4", "us-central1"]
+
+trusted_image_projects = ["projects/approved-projects-ids"]
