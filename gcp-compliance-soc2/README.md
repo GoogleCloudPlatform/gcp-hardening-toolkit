@@ -314,6 +314,211 @@ gcp-compliance-soc2/
     └── monitoring-alerting/         # Security alerts
 ```
 
+## Post-Deployment Steps
+
+After successfully deploying this module, complete these additional steps for full SOC2 compliance:
+
+### 1. Verify Deployment
+
+```bash
+# Check organization policies are active
+gcloud org-policies list --organization=<ORG_ID>
+
+# Verify audit logs are flowing
+gcloud logging read "logName:cloudaudit.googleapis.com" \
+  --organization=<ORG_ID> \
+  --limit=10
+
+# Check monitoring alerts
+gcloud alpha monitoring policies list --project=<AUDIT_PROJECT>
+```
+
+### 2. Test Security Alerts
+
+Trigger test alerts to ensure notifications are working:
+
+```bash
+# Test privileged role grant alert
+gcloud projects add-iam-policy-binding <TEST_PROJECT> \
+  --member="user:test@example.com" \
+  --role="roles/editor"
+
+# Wait 5 minutes and check email for alert
+# Then remove the test grant
+gcloud projects remove-iam-policy-binding <TEST_PROJECT> \
+  --member="user:test@example.com" \
+  --role="roles/editor"
+```
+
+### 3. Document Exemptions
+
+If you exempted any projects from policies, document:
+* Which projects are exempted
+* Why they need exemptions
+* Compensating controls in place
+* Review schedule for exemptions
+
+### 4. Schedule Regular Reviews
+
+Set up recurring reviews:
+* **Weekly**: Review security alert emails
+* **Monthly**: Audit log analysis for anomalies
+* **Quarterly**: Access reviews and policy effectiveness
+* **Annually**: Full SOC2 audit preparation
+
+## Future Improvements
+
+The following controls are recommended by GCP Compliance Manager for SOC2 compliance and could be added to this module:
+
+### Organization-Level Controls
+
+**Essential Contacts & Notifications:**
+* Configure essential contacts for organization-level notifications
+* Set up security contact distribution lists
+
+**Default Network Management:**
+* `compute.skipDefaultNetworkCreation`
+* Remove legacy networks from existing projects
+
+**DNSSEC & DNS Security:**
+* `dns.enableDnssec`
+* `dns.disableRsaSha1`
+* `dns.enableLogging`
+
+**VPC Security:**
+* `compute.requireVpcFlowLogs`
+* `compute.disableInternetNetworkEndpointGroup`
+
+### Compute & VM Controls
+
+**VM Security Hardening:**
+* `compute.disableSerialPortLogging`
+* `compute.disableIpForwarding`
+* `compute.disableDefaultServiceAccount`
+* `compute.disableDefaultServiceAccountFullAccess`
+* `compute.requireConfidentialCompute`
+
+**SSH & RDP Access:**
+* `compute.restrictSshAccess`
+* `compute.restrictRdpAccess`
+* `compute.disableProjectWideSshKeys`
+
+### Cloud SQL Security
+
+**SQL Instance Configuration:**
+* `sql.requireSslConnection`
+* `sql.requireCmek`
+
+**SQL Server Database Flags:**
+* `sql.sqlserver.externalScriptsEnabled`
+* `sql.sqlserver.containedDatabaseAuthentication`
+* `sql.sqlserver.crossDbOwnershipChaining`
+* `sql.sqlserver.remoteAccess`
+* `sql.sqlserver.traceFlag3625`
+* `sql.sqlserver.userOptions`
+* `sql.sqlserver.userConnections`
+
+**PostgreSQL Database Flags:**
+* `sql.postgres.logConnections`
+* `sql.postgres.logDisconnections`
+* `sql.postgres.logErrorVerbosity`
+* `sql.postgres.logMinDurationStatement`
+* `sql.postgres.logMinErrorStatement`
+* `sql.postgres.logMinMessages`
+* `sql.postgres.logStatement`
+
+**MySQL Database Flags:**
+* `sql.mysql.skipShowDatabase`
+
+### AlloyDB Security
+
+**AlloyDB Instance Configuration:**
+* `alloydb.requirePrivateIp`
+* `alloydb.requireCmek`
+
+**AlloyDB Database Flags:**
+* `alloydb.logErrorVerbosity`
+* `alloydb.logMinErrorStatement`
+* `alloydb.logMinMessages`
+
+### IAM & Access Controls
+
+**Service Account Security:**
+* `iam.restrictServiceAccountUserRole`
+* `iam.restrictServiceAccountTokenCreator`
+* `iam.enforceServiceAccountSeparationOfDuties`
+
+**KMS & Encryption:**
+* `cloudkms.restrictPublicAccess`
+* `cloudkms.enforceOwnerSeparationOfDuties`
+* `cloudkms.enforceSeparationOfDuties`
+* `cloudkms.requireKeyRotation`
+
+### Storage & Data Security
+
+**Cloud Storage:**
+* `storage.requireBucketPolicyOnly`
+* `storage.requireRetentionPolicy`
+* `storage.restrictAnonymousAccess`
+
+**BigQuery:**
+* `bigquery.restrictPublicDatasets`
+* `bigquery.requireCmek`
+* `bigquery.restrictPublicTables`
+
+**Dataproc:**
+* `dataproc.requireCmek`
+
+**Disk Encryption:**
+* `compute.requireCsek`
+
+### Project & API Management
+
+**API Enablement:**
+* Require Cloud Asset API enabled for all projects
+* Monitor API enablement for security services
+
+### Monitoring & Logging
+
+**Log Retention:**
+* Configure appropriate log retention periods
+* Implement log archival policies
+
+## Implementation Priority
+
+**High Priority (Security Critical):**
+1. SSH/RDP firewall restrictions
+2. SQL database flag configurations
+3. KMS separation of duties
+4. Default network prevention
+
+**Medium Priority (Compliance Important):**
+1. DNSSEC enablement
+2. VPC Flow Logs
+3. AlloyDB security configurations
+4. Service account role restrictions
+
+**Low Priority (Best Practices):**
+1. Essential contacts configuration
+2. Serial console disablement
+3. IP forwarding restrictions
+4. Locked retention policies
+
+## Contributing
+
+We welcome contributions! Areas where help is needed:
+
+* Additional organization policies
+* Enhanced monitoring alerts
+* Documentation improvements
+* Testing in different environments
+
+Please follow the existing module structure and include:
+* Terraform code following Google's style guide
+* Documentation updates
+* Example usage
+* Testing evidence
+
 ## Support
 
 For issues or questions:
@@ -324,3 +529,4 @@ For issues or questions:
 ## License
 
 See LICENSE file in repository root.
+
