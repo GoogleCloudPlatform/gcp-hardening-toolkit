@@ -1,144 +1,128 @@
 # GCP SOC2 Compliance Module
 
-This Terraform module automates the deployment of SOC2 Trust Services Criteria controls across your Google Cloud Platform organization. It provides a rapid path to SOC2 compliance by implementing security, availability, and confidentiality controls through organization policies, audit logging, and monitoring.
+This Terraform module automates the deployment of SOC2 Trust Services Criteria controls across your Google Cloud Platform organization. It provides a rapid path to SOC2 compliance by implementing security, availability, and confidentiality controls through organization policies, cost-optimized audit logging, and real-time security monitoring.
 
-## Features
+## How it works
 
-This module implements the following SOC2 Trust Services Criteria:
+This module has three main components:
 
-### Security Controls (Common Criteria CC1-CC9) ✅
-- **CC6.1-CC6.2**: IAM access controls and service account restrictions
-- **CC6.6**: Privileged access monitoring and public IP restrictions
-- **CC7.2**: System monitoring with OS Login and Shielded VMs
-- **CC8.1**: Change management through audit logging
+1. **Organization Policies:** Enforces 13 security controls across Security (CC), Availability (A), and Confidentiality (C) criteria through GCP organization policies.
 
-### Availability Controls (A1.1-A1.3) ✅
-- **A1.1**: Automated backup enforcement for Cloud SQL
-- **A1.3**: Resource location restrictions for multi-region deployment
+2. **Audit Logging:** Enables comprehensive audit logging (`ADMIN_READ`, `DATA_READ`, `DATA_WRITE`) for all services at the organization level, with cost-optimized Cloud Storage lifecycle policies for 365-day retention.
 
-### Confidentiality Controls (C1.1-C1.2) ✅
-- **C1.1**: Encryption at rest (CMEK enforcement) and data access prevention
-- **C1.2**: Encryption in transit and VPC security controls
+3. **Security Monitoring:** Creates notification channels and alert policies for real-time detection of:
+   - Privileged role grants (Owner/Editor)
+   - Service account key creation attempts
+   - Cloud Storage IAM permission changes
+   - Organization policy modifications
 
-### Audit Logging & Monitoring
-- Comprehensive audit log collection (ADMIN_READ, DATA_READ, DATA_WRITE)
-- 365+ day log retention in Cloud Storage and BigQuery
-- Real-time security alerts for policy violations
-- Evidence collection for SOC2 audits
+## Disclaimer
 
-## Architecture
+This module provides a technical implementation for SOC2 compliance controls on Google Cloud Platform. It is not a complete compliance solution. The configurations are designed to demonstrate how to enforce SOC2 controls and create compliance-related alerts. You should review and adapt the code to meet the specific security and compliance requirements of your organization. Third-party audit validation is recommended for SOC2 certification.
 
-```
-gcp-compliance-soc2/
-├── main.tf                          # Main orchestration
-├── variables.tf                     # Input variables
-├── outputs.tf                       # Module outputs
-├── modules/
-│   ├── security-controls/           # CC1-CC9 controls
-│   ├── availability-controls/       # A1.1-A1.3 controls
-│   ├── confidentiality-controls/    # C1.1-C1.2 controls
-│   ├── audit-logging/               # Centralized logging
-│   └── monitoring-alerting/         # Security alerts
-├── examples/
-│   ├── basic/                       # Simple deployment
-│   └── complete/                    # Full-featured deployment
-└── docs/
-    └── soc2-control-mapping.md      # Control documentation
-```
+## How to use this module
 
-## Prerequisites
+Here is the recommended workflow to deploy SOC2 compliance controls:
 
-### Required GCP APIs
-Enable the following APIs in your quota project:
+### Prerequisites
+
+* **Google Cloud SDK:** You need to have the `gcloud` command-line tool installed and configured to authenticate to your GCP account.
+* **Terraform:** You need to have Terraform installed on your local machine (version 1.0+).
+* **Permissions:** The user or service account running Terraform needs the following roles:
+
+  **Organization Level:**
+  * `roles/resourcemanager.organizationAdmin`
+  * `roles/orgpolicy.policyAdmin`
+  * `roles/logging.configWriter`
+
+  **Project Level (audit project):**
+  * `roles/owner` or the following roles:
+    * `roles/storage.admin`
+    * `roles/logging.configWriter`
+    * `roles/monitoring.notificationChannelEditor`
+    * `roles/monitoring.alertPolicyEditor`
+
+### Step 1: Configure your environment
+
+1. **Enable APIs:** The following APIs must be enabled in the quota project:
+
+   * `cloudresourcemanager.googleapis.com`
+   * `orgpolicy.googleapis.com`
+   * `logging.googleapis.com`
+   * `monitoring.googleapis.com`
+   * `storage.googleapis.com`
+
+   You can enable them by running:
+
+   ```bash
+   gcloud services enable cloudresourcemanager.googleapis.com --project <YOUR_QUOTA_PROJECT>
+   gcloud services enable orgpolicy.googleapis.com --project <YOUR_QUOTA_PROJECT>
+   gcloud services enable logging.googleapis.com --project <YOUR_QUOTA_PROJECT>
+   gcloud services enable monitoring.googleapis.com --project <YOUR_QUOTA_PROJECT>
+   gcloud services enable storage.googleapis.com --project <YOUR_QUOTA_PROJECT>
+   ```
+
+2. **Configure Terraform Variables:** Create a `terraform.tfvars` file in the root of the module and add the following variables:
+
+   ```hcl
+   organization_id      = "<YOUR_ORGANIZATION_ID>"
+   quota_project        = "<YOUR_QUOTA_PROJECT>"
+   audit_project_id     = "<YOUR_AUDIT_PROJECT_ID>"
+   security_team_email  = "<YOUR_SECURITY_TEAM_EMAIL>"
+   ```
+
+### Step 2: Apply the Terraform Configuration
+
+Initialize and apply the Terraform configuration:
+
 ```bash
-gcloud services enable cloudresourcemanager.googleapis.com --project <YOUR_QUOTA_PROJECT>
-gcloud services enable orgpolicy.googleapis.com --project <YOUR_QUOTA_PROJECT>
-gcloud services enable logging.googleapis.com --project <YOUR_QUOTA_PROJECT>
-gcloud services enable monitoring.googleapis.com --project <YOUR_QUOTA_PROJECT>
-gcloud services enable bigquery.googleapis.com --project <YOUR_QUOTA_PROJECT>
-gcloud services enable storage.googleapis.com --project <YOUR_QUOTA_PROJECT>
+terraform init
+terraform apply
 ```
 
-### Required Permissions
-The user or service account deploying this module needs:
+## What gets deployed
 
-**Organization Level:**
-- `roles/resourcemanager.organizationAdmin`
-- `roles/orgpolicy.policyAdmin`
-- `roles/logging.configWriter`
+### Organization Policies (13 total)
 
-**Project Level (audit project):**
-- `roles/owner` or the following roles:
-  - `roles/storage.admin`
-  - `roles/bigquery.admin`
-  - `roles/logging.configWriter`
-  - `roles/monitoring.notificationChannelEditor`
-  - `roles/monitoring.alertPolicyEditor`
+**Security Controls (7 policies):**
+* `iam.disableServiceAccountKeyCreation` - Blocks service account key creation
+* `iam.automaticIamGrantsForDefaultServiceAccounts` - Prevents automatic Editor grants
+* `iam.allowedPolicyMemberDomains` - Restricts IAM member domains
+* `compute.vmExternalIpAccess` - Blocks public IPs on VMs
+* `compute.requireOsLogin` - Requires OS Login for SSH access
+* `compute.requireShieldedVm` - Requires Shielded VMs
+* `sql.restrictPublicIp` - Blocks public IPs on Cloud SQL
 
-## Usage
+**Availability Controls (2 policies):**
+* `gcp.resourceLocations` - Restricts resource deployment to approved regions
+* `sql.restrictAuthorizedNetworks` - Enforces SQL network restrictions
 
-### Basic Example
+**Confidentiality Controls (4 policies):**
+* `storage.uniformBucketLevelAccess` - Enforces uniform bucket-level access
+* `storage.publicAccessPrevention` - Prevents public bucket access
+* `gcp.restrictNonCmekServices` - Requires CMEK for sensitive services
+* `compute.restrictVpcPeering` - Restricts VPC peering
 
-```hcl
-module "soc2_compliance" {
-  source = "./gcp-compliance-soc2"
+### Audit Logging Infrastructure
 
-  organization_id = "123456789012"
-  quota_project   = "my-quota-project"
-  audit_project_id = "my-audit-project"
-  
-  security_team_email = "security@example.com"
-  
-  enabled_criteria = {
-    security        = true
-    availability    = true
-    confidentiality = true
-  }
-}
-```
+**Cloud Storage Bucket** with cost-optimized lifecycle policies:
+* Days 0-30: Standard storage (fast access)
+* Days 31-90: Nearline storage (monthly access)
+* Days 91-180: Coldline storage (quarterly access)
+* Days 181-365: Archive storage (annual compliance)
+* Day 365+: Automatic deletion
 
-### Complete Example
+**Cost Savings:** ~90% reduction vs BigQuery ($24-60/year vs $240-480/year)
 
-```hcl
-module "soc2_compliance" {
-  source = "./gcp-compliance-soc2"
+### Security Monitoring
 
-  organization_id      = "123456789012"
-  folder_id            = "987654321"  # Optional: scope to folder
-  quota_project        = "my-quota-project"
-  audit_project_id     = "my-audit-project"
-  log_bucket_location  = "us-central1"
-  
-  # Retain logs for 2 years
-  audit_log_retention_days = 730
-  
-  # Enable all criteria
-  enabled_criteria = {
-    security        = true
-    availability    = true
-    confidentiality = true
-  }
-  
-  # Restrict resources to specific regions
-  allowed_regions = [
-    "us-central1",
-    "us-east1"
-  ]
-  
-  # Exempt development projects from certain policies
-  exempted_projects = [
-    "dev-sandbox-123",
-    "testing-456"
-  ]
-  
-  # Notification channels
-  security_team_email   = "security@example.com"
-  compliance_team_email = "compliance@example.com"
-  ops_team_email        = "ops@example.com"
-}
-```
+**4 Alert Policies** with email notifications:
+1. **Privileged Role Grants** (CRITICAL) - Detects Owner/Editor role assignments
+2. **Service Account Key Creation** (WARNING) - Alerts on policy bypass attempts
+3. **Cloud Storage IAM Changes** (WARNING) - Monitors bucket permission changes
+4. **Organization Policy Changes** (CRITICAL) - Alerts on security control modifications
 
-## Configuration
+## Configuration Options
 
 ### Required Variables
 
@@ -158,88 +142,64 @@ module "soc2_compliance" {
 | `audit_log_retention_days` | Log retention period | 365 |
 | `allowed_regions` | Allowed GCP regions | ["us-central1", "us-east1"] |
 | `exempted_projects` | Projects exempt from policies | [] |
+| `enabled_criteria.security` | Enable security controls | true |
+| `enabled_criteria.availability` | Enable availability controls | true |
+| `enabled_criteria.confidentiality` | Enable confidentiality controls | true |
 
-## Deployment Steps
+## Usage Examples
 
-### Step 1: Configure Variables
-
-Create a `terraform.tfvars` file:
+### Basic Deployment
 
 ```hcl
-organization_id      = "123456789012"
-quota_project        = "my-quota-project"
-audit_project_id     = "my-audit-project"
-security_team_email  = "security@example.com"
+module "soc2_compliance" {
+  source = "./gcp-compliance-soc2"
+
+  organization_id      = "123456789012"
+  quota_project        = "my-quota-project"
+  audit_project_id     = "my-audit-project"
+  security_team_email  = "security@example.com"
+}
 ```
 
-### Step 2: Initialize Terraform
+### Advanced Deployment
 
-```bash
-cd gcp-compliance-soc2
-terraform init
-```
+```hcl
+module "soc2_compliance" {
+  source = "./gcp-compliance-soc2"
 
-### Step 3: Review Plan
-
-```bash
-terraform plan
-```
-
-### Step 4: Apply Configuration
-
-```bash
-terraform apply
-```
-
-## Organization Policies Deployed
-
-### Security Controls
-- `iam.disableServiceAccountKeyCreation` - Blocks service account key creation
-- `iam.automaticIamGrantsForDefaultServiceAccounts` - Disables default SA grants
-- `iam.allowedPolicyMemberDomains` - Restricts IAM policy member domains
-- `compute.vmExternalIpAccess` - Blocks public IPs on VMs
-- `compute.requireOsLogin` - Requires OS Login for SSH
-- `compute.requireShieldedVm` - Requires Shielded VMs
-- `sql.restrictPublicIp` - Blocks public IPs on Cloud SQL
-
-### Availability Controls
-- `gcp.resourceLocations` - Restricts resource locations
-- `sql.restrictAuthorizedNetworks` - Enforces SQL backups
-
-### Confidentiality Controls
-- `storage.uniformBucketLevelAccess` - Enforces uniform bucket access
-- `storage.publicAccessPrevention` - Prevents public bucket access
-- `gcp.restrictNonCmekServices` - Requires CMEK encryption
-- `compute.restrictVpcPeering` - Restricts VPC peering
-- `bigquery.restrictPublicDataset` - Prevents public datasets
-
-## Security Alerts
-
-The module creates the following real-time alerts:
-
-1. **Privileged Role Grants** - Alerts when Owner/Editor roles are granted
-2. **Service Account Key Creation** - Alerts on SA key creation attempts
-3. **Cloud Storage IAM Changes** - Alerts on GCS permission modifications
-4. **Organization Policy Changes** - Alerts on policy modifications
-
-## Audit Evidence Collection
-
-Audit logs are exported to:
-- **Cloud Storage**: Long-term retention with lifecycle management
-- **BigQuery**: Queryable dataset for evidence collection
-
-Example BigQuery query for privileged access review:
-```sql
-SELECT
-  timestamp,
-  protoPayload.authenticationInfo.principalEmail AS user,
-  protoPayload.methodName AS action,
-  resource.labels.project_id AS project
-FROM `<project>.soc2_audit_logs.cloudaudit_googleapis_com_activity_*`
-WHERE protoPayload.serviceName = 'iam.googleapis.com'
-  AND protoPayload.methodName LIKE '%SetIamPolicy%'
-  AND DATE(timestamp) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAYS)
-ORDER BY timestamp DESC;
+  organization_id      = "123456789012"
+  folder_id            = "987654321"  # Optional: scope to folder
+  quota_project        = "my-quota-project"
+  audit_project_id     = "my-audit-project"
+  log_bucket_location  = "us-central1"
+  
+  # Retain logs for 2 years
+  audit_log_retention_days = 730
+  
+  # Enable specific criteria
+  enabled_criteria = {
+    security        = true
+    availability    = true
+    confidentiality = true
+  }
+  
+  # Restrict to specific regions
+  allowed_regions = [
+    "us-central1",
+    "us-east1"
+  ]
+  
+  # Exempt development projects
+  exempted_projects = [
+    "dev-sandbox-123",
+    "testing-456"
+  ]
+  
+  # Notification channels
+  security_team_email   = "security@example.com"
+  compliance_team_email = "compliance@example.com"
+  ops_team_email        = "ops@example.com"
+}
 ```
 
 ## Outputs
@@ -247,62 +207,120 @@ ORDER BY timestamp DESC;
 | Output | Description |
 |--------|-------------|
 | `audit_log_bucket_name` | Cloud Storage bucket for audit logs |
-| `audit_log_bigquery_dataset` | BigQuery dataset for log analysis |
+| `audit_log_bucket_url` | Console URL to access audit log bucket |
+| `storage_lifecycle_summary` | Summary of storage lifecycle tiers |
 | `security_notification_channel_id` | Monitoring channel for security team |
 | `enabled_organization_policies` | List of enabled policies |
 | `soc2_compliance_summary` | Summary of enabled controls |
 
-## Compliance Notes
+## Audit Evidence Collection
 
-### SOC2 Requirements Met
-- ✅ Comprehensive audit logging (365+ day retention)
-- ✅ Access control enforcement (IAM policies)
-- ✅ Encryption at rest and in transit
-- ✅ Monitoring and alerting for security events
-- ✅ Change management controls
-- ✅ Data protection and confidentiality
+### Accessing Logs
+
+**For recent logs (0-30 days):**
+* Use Cloud Logging Logs Explorer (free, real-time)
+* Filter and export specific events
+
+**For older logs (30-365 days):**
+* Download from Cloud Storage bucket
+* Load into BigQuery on-demand for analysis
+* Use `gsutil` to search log files
+
+### Example: Load logs into BigQuery for analysis
+
+```bash
+# Load specific date range into BigQuery
+bq load --source_format=JSON \
+  my_dataset.audit_logs \
+  gs://ORG_ID-soc2-audit-logs/logs/YYYY/MM/DD/*.json
+```
+
+### Example: Query for privileged access review
+
+```sql
+SELECT
+  timestamp,
+  protoPayload.authenticationInfo.principalEmail AS user,
+  protoPayload.methodName AS action,
+  resource.labels.project_id AS project
+FROM `<project>.audit_logs.cloudaudit_googleapis_com_activity_*`
+WHERE protoPayload.serviceName = 'iam.googleapis.com'
+  AND protoPayload.methodName LIKE '%SetIamPolicy%'
+  AND DATE(timestamp) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAYS)
+ORDER BY timestamp DESC;
+```
+
+## SOC2 Compliance Coverage
+
+### Trust Services Criteria Implemented
+
+✅ **Security (Common Criteria CC1-CC9)**
+* Access controls and authentication
+* Logical and physical access restrictions
+* System monitoring and change management
+
+✅ **Availability (A1.1-A1.3)**
+* Backup and recovery procedures
+* Resource location restrictions
+* Capacity planning
+
+✅ **Confidentiality (C1.1-C1.2)**
+* Encryption at rest and in transit
+* Data access prevention
+* Network security controls
+
+### Compliance Notes
+
+* Comprehensive audit logging (365-day retention)
+* Real-time security monitoring and alerting
+* Evidence collection for SOC2 audits
+* Automated enforcement of security controls
 
 ### Limitations
-- This module provides technical controls only
-- Organizational policies and procedures must be documented separately
-- Regular access reviews and security assessments are still required
-- Third-party audit validation is recommended
+
+* This module provides technical controls only
+* Organizational policies and procedures must be documented separately
+* Regular access reviews and security assessments are still required
+* Third-party audit validation is recommended for SOC2 certification
 
 ## Troubleshooting
 
 ### Common Issues
 
-**Issue**: Organization policy conflicts
-**Solution**: Check for existing policies that may conflict. Use `gcloud org-policies list --organization=<ORG_ID>` to review.
+**Issue:** Organization policy conflicts  
+**Solution:** Check for existing policies that may conflict. Use `gcloud org-policies list --organization=<ORG_ID>` to review.
 
-**Issue**: Insufficient permissions
-**Solution**: Ensure the deploying account has required roles listed in Prerequisites.
+**Issue:** Insufficient permissions  
+**Solution:** Ensure the deploying account has required roles listed in Prerequisites.
 
-**Issue**: API not enabled
-**Solution**: Enable required APIs in the quota project.
+**Issue:** API not enabled  
+**Solution:** Enable required APIs in the quota project using the commands in Step 1.
 
-## Contributing
+**Issue:** Cost concerns about audit logging  
+**Solution:** This module uses Cloud Storage lifecycle policies for ~90% cost savings vs BigQuery. Logs automatically transition to cheaper storage tiers over time.
 
-Contributions are welcome! Please follow the existing module structure and include:
-- Terraform code following Google's style guide
-- Documentation updates
-- Example usage
+## Module Structure
 
-## License
-
-See LICENSE file in repository root.
+```
+gcp-compliance-soc2/
+├── main.tf                          # Main orchestration
+├── variables.tf                     # Input variables
+├── outputs.tf                       # Module outputs
+└── modules/
+    ├── security-controls/           # CC1-CC9 controls
+    ├── availability-controls/       # A1.1-A1.3 controls
+    ├── confidentiality-controls/    # C1.1-C1.2 controls
+    ├── audit-logging/               # Cost-optimized logging
+    └── monitoring-alerting/         # Security alerts
+```
 
 ## Support
 
 For issues or questions:
-- Review the [SOC2 Control Mapping](docs/soc2-control-mapping.md)
-- Check existing GitHub issues
-- Contact your security team
+* Review the module documentation
+* Check existing GitHub issues
+* Contact your security team
 
-## Disclaimer
+## License
 
-This module provides a starting point for SOC2 compliance on GCP. It is not a complete compliance solution. Organizations should:
-- Review and adapt controls to meet specific requirements
-- Conduct regular security assessments
-- Engage with qualified auditors for SOC2 certification
-- Maintain documentation of policies and procedures
+See LICENSE file in repository root.
