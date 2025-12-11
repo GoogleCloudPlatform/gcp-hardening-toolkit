@@ -74,6 +74,16 @@ A contribution is not complete without:
 - **Documentation:** A `README.md` explaining the module's input, output, and purpose.
 - **Verification:** Evidence that the module performs the intended hardening task (e.g., test results).
 
-#### 6. Support & Expectations
+#### 6. Policy Compatibility & State Management
+
+To ensure that multiple compliance frameworks (e.g., HIPAA and SOC2) can coexist without conflict, all modules must adhere to the **Incremental Compliance** principle.
+
+* **Additive Logic:** Modules must be designed to be additive. If a policy or constraint is already active (e.g., enabled by a different module), the Terraform logic should verify the existing state rather than attempting a blind overwrite or failing.
+* **Idempotency & Import:** Implement logic to detect if a required change already exists. If the Organization Policy is already set to the required value, the module should respect the existing state.
+* **Non-Destructive Rollbacks:** A `terraform destroy` on one compliance module must **not** break the compliance posture of other active modules.
+    * *Scenario:* If a user runs both HIPAA and SOC2 modules, destroying the HIPAA module should not disable shared security controls required by SOC2.
+    * *Remediation:* Users should be able to restore compliance by re-applying the remaining module (e.g., `terraform apply` on SOC2 after destroying HIPAA), but ideally, shared resources should be managed to minimize this friction.
+
+#### 7. Support & Expectations
 
 This toolkit is a **best-effort open-source project**. While our internal team reviews Issues and PRs to ensure quality, we cannot guarantee specific turnaround times for features or support requests.
