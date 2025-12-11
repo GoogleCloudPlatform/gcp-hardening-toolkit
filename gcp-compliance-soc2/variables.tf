@@ -19,6 +19,11 @@ variable "audit_project_id" {
   type        = string
 }
 
+variable "terraform_service_account" {
+  description = "The service account to impersonate for Terraform execution"
+  type        = string
+}
+
 variable "log_bucket_location" {
   description = "Location for audit log storage bucket"
   type        = string

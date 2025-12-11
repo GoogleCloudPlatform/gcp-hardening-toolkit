@@ -12,7 +12,7 @@ terraform {
 }
 
 provider "google" {
-  impersonate_service_account = "terraform-sa@seed-prj-470417.iam.gserviceaccount.com"
+  impersonate_service_account = var.terraform_service_account #Ensure var.terraform_service_account contains the email of the service account created during bootstrap process
   user_project_override       = true
   billing_project             = var.quota_project
 }
