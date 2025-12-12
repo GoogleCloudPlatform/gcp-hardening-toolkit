@@ -1,3 +1,13 @@
+## 🚧 Code Freeze Status
+
+**Current Status:** 🔴 **Active** (Effective until Jan 5, 2026)
+
+To accommodate the holiday season and end-of-year planning, we are pausing all non-critical updates.
+
+* **Start Date:** December 12, 2025
+* **End Date:** January 5, 2026
+* **Impact:** Pull Requests submitted during this time will be reviewed after the freeze is lifted. Thank you for your patience!
+
 # How to Contribute
 
 We would love to accept your patches and contributions to this project.
