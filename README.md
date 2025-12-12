@@ -1,11 +1,3 @@
-> [!IMPORTANT]
-> **❄️ Holiday Code Freeze in Effect**
-> 
-> Please note that this repository is currently under a code freeze until **January 5, 2026**.
-> * **No new features or non-critical PRs** will be merged during this period.
-> * Critical security patches may still be addressed on a case-by-case basis.
-> * Normal development and review cycles will resume on **Monday, January 5, 2026**.
-
 # GCP Hardening Toolkit
 
 This repository contains a collection of curated Terraform modules designed to enhance the security posture of your Google Cloud Platform (GCP) environment. Each module is a reusable, documented, and tested component that applies a specific security best practice.
