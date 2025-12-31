@@ -26,6 +26,16 @@ Delivers ultra-fast, frictionless compliance. By deploying comprehensive securit
 
 Secures the environment against lateral movement by enforcing advanced hardening constraints. It restricts critical operations, such as blocking the creation of new service accounts and freezing changes to Workforce Identity Pools.
 
+### Detection
+**Prefix:** `gcp-detection`
+
+Extends native observability by deploying custom threat detection pipelines. This pillar focuses on extracting signal from noise using advanced log routing and custom logic to spot anomalies instantly.
+
+### Triage
+**Prefix:** `gcp-triage`
+
+Automates the investigation and decision-making process for security alerts. This pillar helps analysts cut through alert fatigue by enriching findings with context and providing structured frameworks for efficient remediation.
+
 ## Usage
 
 Each of the subdirectories in this repository is a self-contained Terraform module. To use a module, navigate to the subdirectory and follow the instructions in the `README.md` file.
