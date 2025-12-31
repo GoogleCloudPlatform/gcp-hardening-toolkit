@@ -35,13 +35,15 @@ for this purpose.
 
 To maintain the integrity of the Hardening Toolkit, all contributions must adhere to our strict architectural standards. Each module is designed to be **standalone**, **purpose-driven**, and **consistent**.
 
-#### 1. The Three Pillars
+#### 1. The Five Pillars
 
-Your contribution must fall into one of the following three core categories:
+Your contribution must fall into one of the following five core categories:
 
 - **`gcp-foundation`**: Baseline infrastructure setup and security defaults.
 - **`gcp-compliance`**: Resources specifically configured to meet regulatory standards (e.g., NIST, PCI, CIS).
 - **`gcp-constraint`**: Policy definitions and constraints to prevent violations.
+- **`gcp-detection`**: Custom threat detection pipelines and observability configurations.
+- **`gcp-triage`**: Automations for alert analysis, enrichment, and remediation workflows.
 
 #### 2. Strict Naming Convention
 
