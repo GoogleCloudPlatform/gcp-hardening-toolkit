@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 # Resource to generate a random, 6-character hex string.
 resource "random_string" "suffix" {
   length  = 6

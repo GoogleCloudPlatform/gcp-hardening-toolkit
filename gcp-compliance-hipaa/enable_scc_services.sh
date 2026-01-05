@@ -25,4 +25,3 @@ for service in "${SCC_SERVICES[@]}"; do
 done
 
 echo "All services enabled."
-

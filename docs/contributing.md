@@ -89,3 +89,42 @@ To ensure that multiple compliance frameworks (e.g., HIPAA and SOC2) can coexist
 #### 7. Support & Expectations
 
 This toolkit is a **best-effort open-source project**. While our internal team reviews Issues and PRs to ensure quality, we cannot guarantee specific turnaround times for features or support requests.
+
+## Development Setup
+
+To ensure consistent code quality and security checks, we use `pre-commit` hooks. Please follow these steps to set up your local development environment.
+
+### 1. Create a Python Virtual Environment
+It is recommended to use a virtual environment to manage dependencies and avoid conflicts.
+
+```bash
+# Create the virtual environment
+python3 -m venv .tmp_venv
+
+# Activate the virtual environment
+source .tmp_venv/bin/activate
+```
+
+### 2. Install Dependencies
+Install the required tools `pre-commit` and `detect-secrets`.
+
+```bash
+pip install pre-commit detect-secrets
+```
+
+### 3. Install Pre-commit Hooks
+Install the git hooks so they run automatically on every commit.
+
+```bash
+pre-commit install
+```
+
+## Running Checks
+
+You can manually run the pre-commit checks on all files in the repository at any time:
+
+```bash
+pre-commit run --all-files
+```
+
+If you encounter any "secrets" violations that are false positives (e.g., example values in configuration files), please do not bypass the check. Instead, ensure the baseline matches the expected state or discuss it in the Pull Request.

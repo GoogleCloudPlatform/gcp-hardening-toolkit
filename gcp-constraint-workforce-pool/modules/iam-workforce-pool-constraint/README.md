@@ -16,6 +16,6 @@ module "restrict_workforce_pool_roles" {
     "roles/iap.webServiceUser",
     "roles/cloudsql.client"
   ]
-  
+
   display_name = "Corp Workforce Pool Role Restrictions"
 }

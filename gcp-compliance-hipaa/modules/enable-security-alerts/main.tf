@@ -45,7 +45,7 @@ resource "google_monitoring_alert_policy" "gcs_iam_permission_changes_alert" {
       comparison = "COMPARISON_GT"
     }
   }
-  
+
   depends_on = [time_sleep.wait_for_gcs_iam_permission_changes_metric]
 }
 

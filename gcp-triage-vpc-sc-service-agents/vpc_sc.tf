@@ -26,7 +26,7 @@ resource "google_access_context_manager_access_policy" "access_policy" {
 locals {
   # (Keep your existing logic for reading the file and projects)
   static_members_raw = try(split("\n", file("${path.module}/authorized_sa_list.txt")), [])
-  
+
   static_members = [
     for line in local.static_members_raw :
     startswith(trimspace(line), "serviceAccount:") ? trimspace(line) : "serviceAccount:${trimspace(line)}"
@@ -55,7 +55,7 @@ resource "google_access_context_manager_service_perimeter" "perimeter" {
       "projects/${google_project.project_1.number}",
       "projects/${google_project.project_2.number}",
     ]
-    
+
     restricted_services = [
       "storage.googleapis.com",
       "compute.googleapis.com",
@@ -71,11 +71,11 @@ resource "google_access_context_manager_service_perimeter" "perimeter" {
     # -------------------------------------------------------
     ingress_policies {
       ingress_from {
-        # FIX: We ONLY provide the list. 
+        # FIX: We ONLY provide the list.
         # We REMOVED 'identity_type' to avoid the conflict.
         identities = local.final_access_list
       }
-      
+
       ingress_to {
         resources = ["*"]
         operations {
@@ -92,7 +92,7 @@ resource "google_access_context_manager_service_perimeter" "perimeter" {
         # FIX: Same here. Remove identity_type.
         identities = local.final_access_list
       }
-      
+
       egress_to {
         resources = ["*"]
         operations {
