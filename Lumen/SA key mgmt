@@ -1,0 +1,98 @@
+1. Policy Overview
+Purpose:
+To maintain a secured and governed approach to manage service account keys, ensure compliance with organizational cloud security standards, and provide guidance for creation, rotation, and revocation. This policy mandates an "Identity First" approach, where service account keys are an absolute last resort.
+
+2. Service Account Lifecycle Management
+2.1 Creation
+- Provisioning Method: Service Accounts (SAs) must be created via Infrastructure as Code (Terraform) to ensure auditability and consistent state management.
+- Naming Convention: Enforce a strict naming convention (e.g., `sa-<app>-<service>-<env>`) to clearly identify the SA's purpose and limits.
+
+2.2 Key Generation & Storage (Fallback Only)
+Legacy Requirement: If Workload Identity Federation is impossible, keys may be generated but must adhere to:
+1. Automated Generation: Use the `google_service_account_key` Terraform resource. Console creation is prohibited.
+2. Direct-to-Secret Storage: Raw key material must be base64-encoded and stored directly in a Secret Manager Secret Version.
+3. No Local Files: Keys must never exist on developer workstations or in source code.
+
+2.3 Rotation
+- Frequency: Keys must be rotated every 90 days.
+- Automation: Use the automated Cloud Function architecture (Triggered by Secret Manager rotation schedules) to generate new keys and deprecate old ones without human intervention.
+- Zero-Downtime: Applications must support fetching new credentials dynamically.
+
+2.4 Revocation
+- Immediate Action: Revoke keys immediately upon suspected compromise or when the associated application is decommissioned.
+- Method: Delete the key via Terraform (remove resource) or `gcloud iam service-accounts keys delete`.
+
+3. Compliance Framework
+3.1 Logging Requirements
+Google Cloud Team Definition: All key lifecycle events must be captured in centralized audit logs. The primary source for detection is the Cloud Audit Logs (Admin Activity) stream.
+Logging Sources:
+Admin Activity Logs: Enabled by default. Captures management operations (Creation, Deletion).
+Data Access Logs: (Optional but Recommended for High-Risk Projects) Captures DATA_READ operations to show what the key accessed.
+Policy Intelligence (Recommender): Provides metadata on key usage frequency (e.g., lastAuthenticatedTime).
+Key Usage Indicators:
+Creation Event: protoPayload.methodName="google.iam.admin.v1.CreateServiceAccountKey"
+Authentication Event: protoPayload.authenticationInfo.serviceAccountKeyId (Present in Data Access logs or specific API calls).
+Recommended Log Filters:
+New Key Creation: resource.type="service_account" AND protoPayload.methodName="google.iam.admin.v1.CreateServiceAccountKey"
+Key Deletion: resource.type="service_account" AND protoPayload.methodName="google.iam.admin.v1.DeleteServiceAccountKey"
+Retention Settings:
+Audit logs must be retained for a minimum of 365 days (or per organizational compliance policy) in a centralized Log Bucket or BigQuery dataset to support long-term forensic analysis.
+
+3.2 Monitoring Requirements
+Google Cloud Team Definition: We must monitor for deviations from the established policy, specifically unauthorized creation and dormant keys.
+What Should Be Monitored:
+Unauthorized Creation: Any key created outside of the approved pipeline/automation.
+Key Age/Rotation: Keys exceeding the 90-day rotation policy.
+Dormant Keys: Keys with lastAuthenticatedTime > 90 days (indicating abandonment).
+Anomalous Usage: (Requires SCC Premium) Keys used from unexpected IP addresses or regions.
+Recommendation: Enabled SCCP in Prod projects at a minimum.
+Implementation Strategy:
+Log-Based Metrics: Create a custom metric in Cloud Monitoring that counts occurrences of the "New Key Creation/key deletion" log filter.
+Security Command Center (SCC): Enable Security Health Analytics (SHA) to automatically flag "User-managed service account keys created" as a vulnerability finding. (Requires SCCP)
+Custom Functions: Implement a script (scheduled via Cloud Scheduler) to query the IAM Recommender API weekly for key age and last usage timestamps.
+
+3.3 Alerting & Notification Options
+Google Cloud Team Definition: Alerts must be routed to the Security Operations Center (SOC) or the specific Service Account owners for immediate remediation.
+Recommended Configurations:
+Immediate P1 Alert: Triggered by google.iam.admin.v1.CreateServiceAccountKey.
+Integration: Email/BigPanda.
+Action: Security team investigates if the key creation was authorized.
+SCC Finding Export:
+Integration: Pub/Sub to SIEM (Splunk/BigPanda).
+Action: Ingest high-severity findings for centralized incident management.
+Key Rotation Warning: Triggered when a key approaches the 90-day rotation limit (e.g., at 80 days).
+Integration: Email / JIRA Ticket to Service Account Owner.
+Action: Automated notification sent to the respective owner instructing them to rotate the key before it becomes non-compliant.
+
+3.4 Alternate implementation methods
+Wiz could be leveraged to build out the detections and notifications in a possibly more streamlined manner. Wiz is not yet formally a part of Google so we don’t have visibility into what this would look like outside of what’s included in public documentation.
+
+3.5 Credential Strategy (Identity First)
+Google Cloud Team Definition: "We don't recommend using Google Cloud's Secret Manager to store and rotate service account keys."
+Rationale: If an application can access Secret Manager, it effectively already has an identity (e.g., Workload Identity or an attached Service Account). That identity should be used to authenticate directly to Google Cloud resources, eliminating the need for a service account key entirely.
+
+**Primary Recommendation: Workload Identity Federation**
+- **Scenario**: Applications checking out code, running in AWS/Azure, or on-premise.
+- **Approach**: Configure a Workload Identity Pool to trust the external identity provider (OIDC/SAML). The external app exchanges its native credential for a short-lived GCP access token.
+- **Benefit**: Zero long-lived keys to manage or rotate.
+
+**Secondary Recommendation: Attached Service Accounts**
+- **Scenario**: Applications running on GCP (Compute Engine, Cloud Run, GKE, Cloud Functions).
+- **Approach**: Attach the User-Managed Service Account directly to the compute resource.
+- **Benefit**: GCP manages key rotation automatically.
+
+3.6 Fallback Strategy: Legacy Key Management
+**Only use this strategy if Workload Identity Federation is technically impossible (e.g., legacy on-prem systems without OIDC support).**
+
+If a Service Account Key *must* exist, it is critical to minimize exposure:
+
+**Strict Storage Rules:**
+- **Never** store keys in source code or on developer workstations.
+- **Use Secret Manager (as a Vault):** If the application cannot use identity federation, store the key in Secret Manager. This is *fallback* mitigation because:
+    - It provides an audit trail of access (`secrets.access`).
+    - It centralizes rotation management (compared to scattered file systems).
+
+**Automated Rotation Architecture (Legacy Support):**
+- **Trigger**: Secret Manager rotation schedule invokes Cloud Function via Pub/Sub.
+- **Logic**: Cloud Function generates new key via IAM API -> Adds new version to Secret Manager -> Queues old key deletion.
+- **Deprecation**: Old keys are disabled after 24h safety window, then deleted.

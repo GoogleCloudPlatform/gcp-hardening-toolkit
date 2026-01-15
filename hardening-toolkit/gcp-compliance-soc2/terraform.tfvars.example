@@ -1,0 +1,33 @@
+# Terraform configuration for SOC2 deployment in Argolis
+# Using service account impersonation
+
+organization_id      = "858770860297"  # Get this from: gcloud organizations list
+quota_project        = "seed-prj-470417"
+audit_project_id     = "seed-prj-470417"
+log_bucket_location  = "us-central1"
+
+# Enable SOC2 criteria
+enabled_criteria = {
+  security        = true
+  availability    = true
+  confidentiality = true
+}
+
+# Notification emails
+security_team_email = "yasirhashmi@google.com"
+
+# Optional: Add if you have these teams
+# compliance_team_email = "compliance@example.com"
+# ops_team_email        = "ops@example.com"
+
+# Optional: Restrict to specific regions
+allowed_regions = [
+  "us-central1",
+  "us-east1"
+]
+
+# Optional: Exempt specific projects from policies
+# exempted_projects = [
+#   "dev-project-123",
+#   "sandbox-456"
+# ]

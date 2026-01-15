@@ -1,0 +1,32 @@
+/**
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+variable "parent" {
+  description = "The parent resource to attach the policy to, in the format 'organizations/123' or 'folders/456'."
+  type        = string
+}
+
+variable "enabled" {
+  description = "A boolean flag to enable or disable the creation of resources in this module."
+  type        = bool
+  default     = true
+}
+
+variable "existing_policies" {
+  description = "A map of existing organization policies, with constraint names as keys. Used to prevent creating duplicate policies."
+  type        = map(any)
+  default     = {}
+}

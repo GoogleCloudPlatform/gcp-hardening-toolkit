@@ -1,0 +1,6 @@
+project_id           = "lumen-project-id"  # Replace with actual project ID
+organization_id      = "123456789012"      # Replace with actual org ID
+log_bucket_location  = "us-central1"
+log_retention_days   = 365
+
+# NOTE: Alerts already configured in environment and send to BigPanda
