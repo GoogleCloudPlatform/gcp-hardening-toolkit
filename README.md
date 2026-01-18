@@ -1,5 +1,4 @@
 # GCP Hardening Toolkit
-
 This repository contains a collection of curated Terraform modules designed to enhance the security posture of your Google Cloud Platform (GCP) environment. Each module is a reusable, documented, and tested component that applies a specific security best practice.
 
 ## Vs Cloud Foundations Toolkit
@@ -47,3 +46,11 @@ This design supports **task-force-like engagements**, allowing security teams to
 ## Contributing
 
 Contributions are welcome! Please refer to our [Contributing Guide](docs/contributing.md) for details. If you have a module idea, find a bug, or want to suggest an improvement, please open an issue or submit a pull request.
+
+## Feedback
+Do you use the Hardening Toolkit? We need your help!
+
+We want to understand your user experience and improve the tool's usability.
+It takes **less than 60 seconds**.
+
+[**👉 Take the 1-Minute Survey**](https://forms.gle/LmgxXbJBoqu91dyA9)
