@@ -45,14 +45,6 @@ module "dns_dnssec_enabled_constraint" {
 }
 
 
-module "sql_disallow_external_scripts_constraint" {
-
-  count  = var.enable_sql_constraint ? 1 : 0
-  source = "./modules/sql/disallow-external-scripts-constraint"
-  parent = var.parent
-}
-
-
 
 module "storage_bucket_versioning_constraint" {
 
@@ -97,13 +89,3 @@ module "compute_backend_service_logging_constraint" {
 }
 
 
-
-module "sql_mysql_database_flags_constraint" {
-
-  count  = var.enable_sql_mysql_database_flags_constraint ? 1 : 0
-
-  source = "./modules/sql/mysql-database-flags-constraint"
-
-  parent = var.parent
-
-}

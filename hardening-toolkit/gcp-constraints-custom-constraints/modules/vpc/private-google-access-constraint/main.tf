@@ -41,7 +41,8 @@ resource "google_org_policy_custom_constraint" "private_google_access" {
 }
 
 resource "time_sleep" "wait_for_constraint_creation" {
-  create_duration = "5s"
+  create_duration = "15s"
+  destroy_duration = "15s"
 
   triggers = {
     constraint_name = google_org_policy_custom_constraint.private_google_access.name

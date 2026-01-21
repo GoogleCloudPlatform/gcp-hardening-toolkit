@@ -19,7 +19,7 @@ billing_project = "your-gcp-project-id"
 project_id = "your-gcp-project-id"
 
 # The numeric ID of the organization.
-organization_id = "your_organization_id"
+# organization_id = "your_organization_id"
 
 # ------------------------------------------------------------------------------
 # Constraint Toggles
@@ -29,10 +29,6 @@ organization_id = "your_organization_id"
 
 # Enable the DNSSEC custom constraint.
 enable_dns_constraint = true
-
-
-# Enable the Cloud SQL 'external scripts enabled' custom constraint.
-enable_sql_constraint = true
 
 # Enable the Cloud Storage bucket versioning custom constraint.
 enable_storage_constraint = true
@@ -45,6 +41,3 @@ enable_vpc_custom_mode_constraint = true
 
 # Enable the Backend Service Logging custom constraint.
 enable_compute_backend_service_logging_constraint = true
-
-# Enable the Cloud SQL for MySQL database flags custom constraint.
-enable_sql_mysql_database_flags_constraint = true

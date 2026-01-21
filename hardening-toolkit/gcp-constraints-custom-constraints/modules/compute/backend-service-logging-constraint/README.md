@@ -81,15 +81,17 @@ gcloud compute backend-services create test-backend-with-logging \
 
 ### Terraform-based Testing
 
-For Terraform validation examples, see the test cases in:
-```
-../../tests/compute/backend-service-logging-constraint/
-```
+For automated validation, use the centralized test suite:
 
-These tests include both compliant and non-compliant resource configurations.
+1. **Compliant Test** (Verifies creation is allowed):
+   ```bash
+   cd ../../../tests/compliant
+   terraform apply -target=google_compute_backend_service.compliant_service
+   ```
 
-## Notes
+2. **Non-Compliant Test** (Verifies creation is blocked):
+   ```bash
+   cd ../../../tests/non-compliant
+   terraform apply -target=google_compute_backend_service.violating_service
+   ```
 
-- Logging can impact performance at very high traffic volumes; consider using sampling rates < 1.0 for high-traffic services
-- Logs are stored in Cloud Logging and incur storage costs
-- This constraint applies to both global and regional backend services

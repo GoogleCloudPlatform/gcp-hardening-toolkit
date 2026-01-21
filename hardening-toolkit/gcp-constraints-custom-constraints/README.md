@@ -16,7 +16,6 @@ gcp-constraints/
 ├── modules/                   # Individual constraint modules
 │   ├── compute/              # Compute Engine constraints
 │   ├── dns/                  # Cloud DNS constraints
-│   ├── sql/                  # Cloud SQL constraints
 │   ├── storage/              # Cloud Storage constraints
 │   └── vpc/                  # VPC networking constraints
 └── tests/                    # Validation tests with compliant/non-compliant examples
@@ -27,15 +26,11 @@ gcp-constraints/
 | Constraint | Toggle Variable | Test Directory |
 |---|---|---|
 | [DNSSEC Enabled](./modules/dns/dnssec-enabled-constraint/README.md) | `enable_dns_constraint` | `tests/dns/dnssec-enabled-constraint/` |
-| [Disallow External Scripts](./modules/sql/disallow-external-scripts-constraint/README.md) | `enable_sql_constraint` | `tests/sql/disallow-external-scripts-constraint/` |
 | [Bucket Versioning](./modules/storage/bucket-versioning-constraint/README.md) | `enable_storage_constraint` | `tests/storage/bucket-versioning-constraint/` |
 | [Private Google Access](./modules/vpc/private-google-access-constraint/README.md) | `enable_vpc_private_google_access_constraint` | `tests/vpc/private-google-access-constraint/` |
 | [Custom Mode VPC](./modules/vpc/custom-mode-vpc-constraint/README.md) | `enable_vpc_custom_mode_constraint` | `tests/vpc/custom-mode-vpc-constraint/` |
 | [Backend Service Logging](./modules/compute/backend-service-logging-constraint/README.md) | `enable_compute_backend_service_logging_constraint` | `tests/compute/backend-service-logging-constraint/` |
-| [MySQL Database Flags](./modules/sql/mysql-database-flags-constraint/README.md) | `enable_sql_mysql_database_flags_constraint` | `tests/sql/mysql-database-flags-constraint/` |
-MySQL Database Flags: Enforces security flags:
-  - `skip_show_database=on` - Prevents database enumeration
-  - `local_infile=off` - Disables local file loading to prevent data exfiltration
+
 
 ## Quick Start
 
@@ -64,8 +59,6 @@ enable_storage_constraint                          = true
 enable_vpc_private_google_access_constraint        = true
 enable_vpc_custom_mode_constraint                  = true
 enable_compute_backend_service_logging_constraint  = true
-enable_sql_constraint                              = true
-enable_sql_mysql_database_flags_constraint         = true
 ```
 
 ### 3. Deploy Constraints
@@ -129,8 +122,6 @@ enable_storage_constraint                          = true
 enable_vpc_private_google_access_constraint        = true
 enable_vpc_custom_mode_constraint                  = true
 enable_compute_backend_service_logging_constraint  = true
-enable_sql_constraint                              = true
-enable_sql_mysql_database_flags_constraint         = true
 ```
 
 **Deploy:**
@@ -157,8 +148,6 @@ enable_storage_constraint = true
 enable_vpc_private_google_access_constraint        = false
 enable_vpc_custom_mode_constraint                  = false
 enable_compute_backend_service_logging_constraint  = false
-enable_sql_constraint                              = false
-enable_sql_mysql_database_flags_constraint         = false
 ```
 
 **Deploy:**
@@ -183,8 +172,6 @@ enable_compute_backend_service_logging_constraint  = true
 enable_dns_constraint                              = false
 enable_vpc_private_google_access_constraint        = false
 enable_vpc_custom_mode_constraint                  = false
-enable_sql_constraint                              = false
-enable_sql_mysql_database_flags_constraint         = false
 ```
 
 **Phase 2 - Update terraform.tfvars after monitoring:**
@@ -201,46 +188,28 @@ terraform apply  # Only creates newly enabled modules
 
 ## Testing
 
-Each constraint includes test cases in the `tests/` directory with both compliant and non-compliant resource configurations.
+The testing suite has been simplified into two primary categories to allow for rapid validation of the entire toolkit:
 
-### Running Tests
-
-Navigate to a specific test directory:
+### Compliant Tests (`tests/compliant/`)
+Contains resources that strictly follow the policies. Use these to verify that the constraints do **not** block legitimate, secure resource creation.
 ```bash
-cd tests/storage
+cd tests/compliant
 terraform init
+terraform apply
 ```
 
-Test compliant resource (should succeed):
+### Non-Compliant Tests (`tests/non-compliant/`)
+Contains resources that intentionally violate the policies. Use these to verify that the constraints are successfully blocking insecure configurations.
 ```bash
-terraform apply -target=google_storage_bucket.compliant_bucket
-```
-
-Test non-compliant resource (should fail with constraint violation):
-```bash
-terraform apply -target=google_storage_bucket.violating_bucket
+cd tests/non-compliant
+terraform init
+terraform apply 
 ```
 
 Expected output for violation:
 ```
-Error: Error creating Bucket: googleapi: Error 412: Precondition not met
-Constraint: custom.storageBucketVersioningXXXX violated
-```
-
-### Manual Validation
-
-Test DNSSEC constraint:
-```bash
-gcloud dns managed-zones create test-zone \
-  --description="Test zone" \
-  --dns-name="test.example.com." \
-  --dnssec-state=off
-```
-
-Test bucket versioning constraint:
-```bash
-gcloud storage buckets create gs://test-bucket-no-versioning \
-  --no-versioning
+Error: Error creating Resource: googleapi: Error 412: Precondition not met
+Constraint: custom.constraintNameXXXX violated
 ```
 
 ## Inputs
@@ -255,8 +224,7 @@ gcloud storage buckets create gs://test-bucket-no-versioning \
 | `enable_vpc_private_google_access_constraint` | Enable private Google access constraint | `bool` | `true` | no |
 | `enable_vpc_custom_mode_constraint` | Enable custom mode VPC constraint | `bool` | `true` | no |
 | `enable_compute_backend_service_logging_constraint` | Enable backend service logging constraint | `bool` | `true` | no |
-| `enable_sql_constraint` | Enable SQL external scripts constraint | `bool` | `true` | no |
-| `enable_sql_mysql_database_flags_constraint` | Enable MySQL database flags constraint | `bool` | `true` | no |
+
 
 ## Requirements
 

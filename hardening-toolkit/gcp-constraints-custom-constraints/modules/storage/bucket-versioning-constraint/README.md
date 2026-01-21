@@ -74,28 +74,18 @@ gcloud storage buckets create gs://test-bucket-with-versioning-$(date +%s) \
   --versioning
 ```
 
-### Test with Terraform (should FAIL):
-
-```hcl
-resource "google_storage_bucket" "test_no_versioning" {
-  name     = "test-bucket-no-versioning"
-  location = "US"
-  # Missing: versioning { enabled = true }
-}
-```
-
 ### Terraform-based Testing
 
-For complete Terraform validation examples, see the test cases in:
-```
-../../tests/storage/bucket-versioning-constraint/
-```
+For automated validation, use the centralized test suite:
 
-These tests include both compliant and non-compliant bucket configurations.
+1. **Compliant Test** (Verifies creation is allowed):
+   ```bash
+   cd ../../../tests/compliant
+   terraform apply -target=google_storage_bucket.compliant_bucket
+   ```
 
-## Notes
-
-- Versioning incurs additional storage costs as old versions are retained
-- Use lifecycle policies to automatically delete old versions after a retention period
-- Versioning can be suspended but not disabled once enabled
-- Consider object lifecycle management to control costs
+2. **Non-Compliant Test** (Verifies creation is blocked):
+   ```bash
+   cd ../../../tests/non-compliant
+   terraform apply -target=google_storage_bucket.violating_bucket
+   ```

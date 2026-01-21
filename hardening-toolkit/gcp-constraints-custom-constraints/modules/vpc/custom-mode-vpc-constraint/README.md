@@ -79,27 +79,18 @@ gcloud compute networks subnets create test-subnet \
   --range=10.0.1.0/24
 ```
 
-### Test with Terraform (should FAIL):
-
-```hcl
-resource "google_compute_network" "test_auto" {
-  name                    = "test-auto-network"
-  auto_create_subnetworks = true  # This will violate the constraint
-}
-```
-
 ### Terraform-based Testing
 
-For complete Terraform validation examples, see the test cases in:
-```
-../../tests/vpc/custom-mode-vpc-constraint/
-```
+For automated validation, use the centralized test suite:
 
-These tests include both compliant and non-compliant VPC configurations.
+1. **Compliant Test** (Verifies creation is allowed):
+   ```bash
+   cd ../../../tests/compliant
+   terraform apply -target=google_compute_network.custom_mode_vpc
+   ```
 
-## Notes
-
-- Existing auto mode VPCs are not affected; this only applies to new VPCs
-- Custom mode VPCs require manual subnet creation
-- You cannot convert an auto mode VPC to custom mode (one-way conversion only)
-- Custom mode is recommended for production environments
+2. **Non-Compliant Test** (Verifies creation is blocked):
+   ```bash
+   cd ../../../tests/non-compliant
+   terraform apply -target=google_compute_network.violating_custom_mode_vpc
+   ```

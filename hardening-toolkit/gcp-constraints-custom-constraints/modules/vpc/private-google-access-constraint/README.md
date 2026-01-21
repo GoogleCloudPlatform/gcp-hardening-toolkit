@@ -78,30 +78,18 @@ gcloud compute networks subnets create test-subnet-with-pga \
   --enable-private-ip-google-access
 ```
 
-### Test with Terraform (should FAIL):
-
-```hcl
-resource "google_compute_subnetwork" "test_no_pga" {
-  name          = "test-subnet-no-pga"
-  ip_cidr_range = "10.0.1.0/24"
-  region        = "us-central1"
-  network       = "default"
-  # Missing: private_ip_google_access = true
-}
-```
-
 ### Terraform-based Testing
 
-For complete Terraform validation examples, see the test cases in:
-```
-../../tests/vpc/private-google-access-constraint/
-```
+For automated validation, use the centralized test suite:
 
-These tests include both compliant and non-compliant subnet configurations.
+1. **Compliant Test** (Verifies creation is allowed):
+   ```bash
+   cd ../../../tests/compliant
+   terraform apply -target=google_compute_subnetwork.compliant_subnetwork
+   ```
 
-## Notes
-
-- Private Google access only affects access to Google APIs and services
-- VMs still need Cloud NAT or external IPs to access non-Google internet resources
-- This setting can be enabled on existing subnets without disruption
-- Works with both auto and custom mode VPCs
+2. **Non-Compliant Test** (Verifies creation is blocked):
+   ```bash
+   cd ../../../tests/non-compliant
+   terraform apply -target=google_compute_subnetwork.violating_pga_subnet
+   ```

@@ -20,18 +20,6 @@ variable "enable_dns_constraint" {
   default     = true
 }
 
-variable "enable_sql_constraint" {
-  type        = bool
-  description = "Enable the Cloud SQL 'external scripts enabled' custom constraint."
-  default     = true
-}
-
-variable "enable_sql_mysql_database_flags_constraint" {
-  type        = bool
-  description = "Enable the Cloud SQL for MySQL database flags custom constraint."
-  default     = true
-}
-
 variable "enable_storage_constraint" {
   type        = bool
   description = "Enable the Cloud Storage bucket versioning custom constraint."

@@ -91,17 +91,16 @@ gcloud dns managed-zones create test-private-zone \
 
 ### Terraform-based Testing
 
-For complete Terraform validation examples, see the test cases in:
-```
-../../tests/dns/dnssec_disabled/
-```
+For automated validation, use the centralized test suite:
 
-These tests include both compliant and non-compliant DNS zone configurations.
+1. **Compliant Test** (Verifies creation is allowed):
+   ```bash
+   cd ../../../tests/compliant
+   terraform apply -target=google_dns_managed_zone.compliant_zone
+   ```
 
-## Notes
-
-- **Public zones only**: This constraint only applies to public DNS zones; private zones are exempt
-- **DNSSEC states**: Both `ON` and `TRANSFER` states are considered compliant
-- **Domain registrar**: You must also enable DNSSEC at your domain registrar for full protection
-- **Propagation time**: DNSSEC changes can take time to propagate through DNS hierarchy
-- **Key rotation**: Cloud DNS automatically handles DNSSEC key rotation
+2. **Non-Compliant Test** (Verifies creation is blocked):
+   ```bash
+   cd ../../../tests/non-compliant
+   terraform apply -target=google_dns_managed_zone.violating_zone
+   ```
