@@ -1,0 +1,43 @@
+
+# ------------------------------------------------------------------------------
+# Example Terraform Variables
+#
+# This file shows the variables that can be configured for this module.
+#
+# To use this file, rename it to 'terraform.tfvars' and update the values
+# for your environment.
+# ------------------------------------------------------------------------------
+
+# The parent resource to attach the policy to.
+# Must be in the format 'organizations/{organization_id}', 'folders/{folder_id}', or 'projects/{project_id}'.
+parent = "organizations/your_organization_id"
+
+# The project ID to use for billing and quota.
+billing_project = "your-gcp-project-id"
+
+# The project ID to host the resources in.
+project_id = "your-gcp-project-id"
+
+# The numeric ID of the organization.
+# organization_id = "your_organization_id"
+
+# ------------------------------------------------------------------------------
+# Constraint Toggles
+#
+# Set these to 'true' to enable a constraint, or 'false' to disable it.
+# ------------------------------------------------------------------------------
+
+# Enable the DNSSEC custom constraint.
+enable_dns_constraint = true
+
+# Enable the Cloud Storage bucket versioning custom constraint.
+enable_storage_constraint = true
+
+# Enable the VPC private Google access custom constraint.
+enable_vpc_private_google_access_constraint = true
+
+# Enable the custom mode VPC custom constraint.
+enable_vpc_custom_mode_constraint = true
+
+# Enable the Backend Service Logging custom constraint.
+enable_compute_backend_service_logging_constraint = true
