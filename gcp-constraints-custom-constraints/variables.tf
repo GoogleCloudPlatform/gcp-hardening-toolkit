@@ -20,6 +20,12 @@ variable "enable_dns_constraint" {
   default     = true
 }
 
+variable "enable_dns_policy_logging_constraint" {
+  type        = bool
+  description = "Enable the Cloud DNS Policy Logging custom constraint."
+  default     = true
+}
+
 variable "enable_storage_constraint" {
   type        = bool
   description = "Enable the Cloud Storage bucket versioning custom constraint."
@@ -41,5 +47,29 @@ variable "enable_vpc_custom_mode_constraint" {
 variable "enable_compute_backend_service_logging_constraint" {
   type        = bool
   description = "Enable the Backend Service Logging custom constraint."
+  default     = true
+}
+
+variable "enable_firewall_policy_logging_constraint" {
+  type        = bool
+  description = "Enable the VPC Firewall Rule Logging custom constraint."
+  default     = true
+}
+
+variable "enable_firewall_no_public_access_constraint" {
+  type        = bool
+  description = "Enable the VPC Firewall No Public Access (0.0.0.0/0) custom constraint."
+  default     = true
+}
+
+variable "enable_iam_no_public_bindings_constraint" {
+  type        = bool
+  description = "Enable the IAM No Public Bindings (allUsers, allAuthenticatedUsers) custom constraint."
+  default     = true
+}
+
+variable "enable_sql_ssl_enforcement_constraint" {
+  type        = bool
+  description = "Enable the Cloud SQL SSL Enforcement custom constraint."
   default     = true
 }

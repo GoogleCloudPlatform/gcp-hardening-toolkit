@@ -26,10 +26,16 @@ gcp-constraints/
 | Constraint | Toggle Variable | Test Directory |
 |---|---|---|
 | [DNSSEC Enabled](./modules/dns/dnssec-enabled-constraint/README.md) | `enable_dns_constraint` | `tests/dns/dnssec-enabled-constraint/` |
+| [DNS Policy Logging](./modules/dns/dns-policy-logging-constraint/README.md) | `enable_dns_policy_logging_constraint` | `tests/compliant/` and `tests/non-compliant/` |
 | [Bucket Versioning](./modules/storage/bucket-versioning-constraint/README.md) | `enable_storage_constraint` | `tests/storage/bucket-versioning-constraint/` |
 | [Private Google Access](./modules/vpc/private-google-access-constraint/README.md) | `enable_vpc_private_google_access_constraint` | `tests/vpc/private-google-access-constraint/` |
 | [Custom Mode VPC](./modules/vpc/custom-mode-vpc-constraint/README.md) | `enable_vpc_custom_mode_constraint` | `tests/vpc/custom-mode-vpc-constraint/` |
 | [Backend Service Logging](./modules/compute/backend-service-logging-constraint/README.md) | `enable_compute_backend_service_logging_constraint` | `tests/compute/backend-service-logging-constraint/` |
+| [VPC Firewall Logging](./modules/compute/firewall-logging-constraint/README.md) | `enable_firewall_policy_logging_constraint` | `tests/compliant/` and `tests/non-compliant/` |
+| [VPC Firewall No Public Access](./modules/compute/firewall-no-public-access-constraint/README.md) | `enable_firewall_no_public_access_constraint` | `tests/compliant/` and `tests/non-compliant/` |
+| [No Public Bindings](./modules/iam/no-public-bindings-constraint/README.md) | `enable_iam_no_public_bindings_constraint` | `tests/compliant/` and `tests/non-compliant/` |
+| [Cloud SQL SSL Enforcement](./modules/sql/sql-ssl-enforcement-constraint/README.md) | `enable_sql_ssl_enforcement_constraint` | `tests/compliant/` and `tests/non-compliant/` |
+
 
 
 ## Quick Start
@@ -55,10 +61,13 @@ billing_project = "your-gcp-project-id"
 
 # Enable/disable specific constraints
 enable_dns_constraint                              = true
+enable_dns_policy_logging_constraint               = true
 enable_storage_constraint                          = true
 enable_vpc_private_google_access_constraint        = true
 enable_vpc_custom_mode_constraint                  = true
 enable_compute_backend_service_logging_constraint  = true
+enable_firewall_policy_logging_constraint          = true
+enable_firewall_no_public_access_constraint        = true
 ```
 
 ### 3. Deploy Constraints
@@ -220,10 +229,16 @@ Constraint: custom.constraintNameXXXX violated
 | `project_id` | GCP project ID for API calls | `string` | n/a | yes |
 | `billing_project` | GCP billing project ID for quota | `string` | n/a | yes |
 | `enable_dns_constraint` | Enable DNSSEC custom constraint | `bool` | `true` | no |
+| `enable_dns_policy_logging_constraint` | Enable Cloud DNS policy logging constraint | `bool` | `true` | no |
 | `enable_storage_constraint` | Enable bucket versioning constraint | `bool` | `true` | no |
 | `enable_vpc_private_google_access_constraint` | Enable private Google access constraint | `bool` | `true` | no |
 | `enable_vpc_custom_mode_constraint` | Enable custom mode VPC constraint | `bool` | `true` | no |
 | `enable_compute_backend_service_logging_constraint` | Enable backend service logging constraint | `bool` | `true` | no |
+| `enable_firewall_policy_logging_constraint` | Enable VPC firewall rule logging constraint | `bool` | `true` | no |
+| `enable_firewall_no_public_access_constraint` | Enable VPC firewall no public access (0.0.0.0/0) constraint | `bool` | `true` | no |
+| `enable_iam_no_public_bindings_constraint` | Enable IAM no public bindings (allUsers, allAuthenticatedUsers) constraint | `bool` | `true` | no |
+| `enable_sql_ssl_enforcement_constraint` | Enable Cloud SQL SSL Enforcement constraint | `bool` | `true` | no |
+
 
 
 ## Requirements
@@ -279,6 +294,77 @@ Typically granted via:
    terraform import module.dnssec_enabled_constraint.google_org_policy_custom_constraint.dnssec_enabled organizations/ORG_ID/customConstraints/custom.dnssecEnabledXXXX
    ```
 2. Or manually delete old constraints before redeploying
+
+### Error 409: Transient Policy Update Failures
+
+> [!IMPORTANT]
+> This is a **known, transient issue** with the GCP Organization Policy API when multiple policies are updated concurrently. It is largely cosmetic and does not indicate a failure in policy enforcement.
+
+**Issue**: `terraform apply` fails with error:
+```
+Error: Error updating Policy "organizations/ORG_ID/policies/POLICY_NAME": googleapi: Error 409: The operation was aborted. # pragma: allowlist secret
+```
+**Root Cause**:
+- The GCP Organization Policy API returns Error 409 when multiple policy resources are updated simultaneously
+- This often occurs when Terraform normalizes the `enforce` field from `"TRUE"` (string) to `true` (boolean) in the state
+- The API has rate limiting and concurrency restrictions that can cause transient failures
+- **The policies are typically still enforced correctly** despite the error
+
+**Symptoms**:
+- Error appears during `terraform apply` after successful `terraform refresh`
+- Only affects one or a few policies out of many being updated
+- The error is inconsistent and may not occur on subsequent runs
+- Plan shows only cosmetic changes like `enforce = "TRUE" -> "true"`
+
+**Resolution** (in order of preference):
+
+1. **Use `-parallelism=1` flag** (✅ **Recommended - Tested & Verified**):
+   ```bash
+   terraform apply --auto-approve -parallelism=1
+   ```
+   This forces Terraform to update policies sequentially, completely avoiding concurrent API calls and eliminating the Error 409 issue. This approach has been tested and confirmed to work reliably.
+
+2. **Run `terraform refresh`**:
+   ```bash
+   terraform refresh
+   ```
+   This updates the Terraform state to match the deployed policies without making changes. Use this if you've already encountered the error.
+
+3. **Re-run `terraform apply`**:
+   ```bash
+   terraform apply --auto-approve
+   ```
+   The API often succeeds on subsequent attempts, though the error may recur.
+
+4. **Target the specific failing policy**:
+   ```bash
+   terraform apply -target=module.CONSTRAINT_NAME[0].google_org_policy_policy.POLICY_NAME
+   ```
+   This isolates the update to a single policy, avoiding concurrent API calls.
+
+5. **Ignore if policies are enforcing correctly**:
+   - Verify policies are active using `gcloud org-policies list --organization=ORG_ID`
+   - If enforcement is working, this is purely a state synchronization issue
+   - The error will likely resolve itself on the next `terraform apply`
+
+**Prevention** (✅ **Highly Recommended**):
+
+> [!TIP]
+> **Always use `-parallelism=1` for organization policy deployments** to avoid Error 409 entirely. While this increases deployment time, it ensures reliable, error-free execution.
+
+```bash
+# Recommended for apply
+terraform apply --auto-approve -parallelism=1
+
+# Recommended for destroy
+terraform destroy --auto-approve -parallelism=1
+```
+
+**Why this works**:
+- The GCP Organization Policy API has strict concurrency limitations
+- Sequential updates (parallelism=1) prevent simultaneous policy modifications
+- The `time_sleep` resources in each module provide delays, but cannot fully prevent concurrent API calls when Terraform's default parallelism (10) is used
+- Testing confirms that `-parallelism=1` eliminates the Error 409 issue completely
 
 ## Best Practices
 

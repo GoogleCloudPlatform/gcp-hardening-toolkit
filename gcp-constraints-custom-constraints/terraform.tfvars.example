@@ -30,6 +30,9 @@ project_id = "your-gcp-project-id"
 # Enable the DNSSEC custom constraint.
 enable_dns_constraint = true
 
+# Enable the Cloud DNS Policy Logging custom constraint.
+enable_dns_policy_logging_constraint = true
+
 # Enable the Cloud Storage bucket versioning custom constraint.
 enable_storage_constraint = true
 
@@ -41,3 +44,15 @@ enable_vpc_custom_mode_constraint = true
 
 # Enable the Backend Service Logging custom constraint.
 enable_compute_backend_service_logging_constraint = true
+
+# Enable the VPC Firewall Rule Logging custom constraint.
+enable_firewall_policy_logging_constraint = true
+
+# Enable the VPC Firewall No Public Access (0.0.0.0/0) custom constraint.
+enable_firewall_no_public_access_constraint = true
+
+# Enable the IAM No Public Bindings (allUsers, allAuthenticatedUsers) custom constraint.
+enable_iam_no_public_bindings_constraint = true
+
+# Enable the Cloud SQL SSL Enforcement custom constraint.
+enable_sql_ssl_enforcement_constraint = true

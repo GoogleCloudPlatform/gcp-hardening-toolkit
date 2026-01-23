@@ -44,6 +44,16 @@ module "dns_dnssec_enabled_constraint" {
 
 }
 
+module "dns_policy_logging_constraint" {
+
+  count  = var.enable_dns_policy_logging_constraint ? 1 : 0
+
+  source = "./modules/dns/dns-policy-logging-constraint"
+
+  parent = var.parent
+
+}
+
 
 
 module "storage_bucket_versioning_constraint" {
@@ -86,4 +96,36 @@ module "compute_backend_service_logging_constraint" {
 
   parent = var.parent
 
+}
+
+module "compute_firewall_policy_logging_constraint" {
+
+  count  = var.enable_firewall_policy_logging_constraint ? 1 : 0
+
+  source = "./modules/compute/firewall-logging-constraint"
+
+  parent = var.parent
+
+}
+
+module "compute_firewall_no_public_access_constraint" {
+
+  count  = var.enable_firewall_no_public_access_constraint ? 1 : 0
+
+  source = "./modules/compute/firewall-no-public-access-constraint"
+
+  parent = var.parent
+
+}
+
+module "iam_no_public_bindings_constraint" {
+  count  = var.enable_iam_no_public_bindings_constraint ? 1 : 0
+  source = "./modules/iam/no-public-bindings-constraint"
+  parent = var.parent
+}
+
+module "sql_ssl_enforcement_constraint" {
+  count  = var.enable_sql_ssl_enforcement_constraint ? 1 : 0
+  source = "./modules/sql/sql-ssl-enforcement-constraint"
+  parent = var.parent
 }
