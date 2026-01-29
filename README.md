@@ -31,17 +31,34 @@ Extends native observability by deploying custom threat detection pipelines. Thi
 
 Automates the investigation and decision-making process for security alerts. This pillar helps analysts cut through alert fatigue by enriching findings with context and providing structured frameworks for efficient remediation.
 
+## Repository Structure
+
+The repository follows a **Library + Blueprints** architecture, decoupled to allow flexible composition.
+
+### 1. Blueprints (`blueprints/`)
+**The Solution Layer.**
+Blueprints are ready-to-deploy compositions that act as reference architectures. They orchestrate multiple modules to solve a specific security challenge (e.g., `gcp-foundation-org-iam`, `gcp-compliance-hipaa`).
+- **Naming**: `gcp-<pillar>-<name>` (e.g., `gcp-foundation-org-iam`)
+- **Purpose**: Operational code that invokes modules.
+
+### 2. Modules (`modules/`)
+**The Core Library.**
+Modules are standalone, functional capabilities. They are "dry" and decoupled from specific providers/backends, designed to be composed by blueprints.
+- **Naming**: `gcp-<category>-<name>` (e.g., `gcp-iam-groups`, `gcp-custom-constraints/dns-dnssec`)
+- **Purpose**: Reusable logic.
+- **Grouping**: Constraint modules are grouped in `modules/gcp-custom-constraints/` for better organization.
+
 ## Usage
 
-This toolkit is built on a **modular architecture**, ensuring that components are **self-contained** and have minimal dependencies on each other.
-
 ### How it Works
-Each subdirectory in this repository is a standalone module with its own **self-contained documentation**.
-*   **Navigate to the module**: Go to the specific subdirectory for the hardening task you need.
-*   **Read the Internal README**: Each module has a dedicated `README.md` explaining exactly what it does, how it works, and how to use it.
-*   **Multi-Language Hardening**: While **Terraform** is used as the baseline for deploying infrastructure, deep security hardening often requires more than just Infrastructure-as-Code. Many modules leverage **Bash scripts**, **Python**, or **Go** to perform complex hardening tasks, logical checks, or API interactions that Terraform cannot handle alone.
-
-This design supports **task-force-like engagements**, allowing security teams to rapidly deploy specific, targeted measures without needing to adopt a monolithic framework.
+1.  **Select a Blueprint**: Choose a solution from `blueprints/` that matches your goal.
+2.  **Customize**: Blueprints come with their own `examples` or default `variables`.
+3.  **Deploy**: Authenticate and run Terraform within the blueprint directory.
+    ```bash
+    cd blueprints/gcp-foundation-org-iam
+    terraform init
+    terraform apply
+    ```
 
 ## Contributing
 

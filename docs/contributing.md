@@ -31,35 +31,26 @@ All submissions, including submissions by project members, require review. We
 use [GitHub pull requests](https://docs.github.com/articles/about-pull-requests)
 for this purpose.
 
-### Module Architecture & Naming Conventions
+#### 2. Architecture & Naming Conventions
+The repository follows a **Library + Blueprints** architecture.
 
-To maintain the integrity of the Hardening Toolkit, all contributions must adhere to our strict architectural standards. Each module is designed to be **standalone**, **purpose-driven**, and **consistent**.
+- **Blueprints (`blueprints/`):** Comprehensive solutions (Pillar-based).
+    - **Format:** `gcp-<pillar>-<name>` (e.g., `gcp-foundation-org-iam`)
+- **Modules (`modules/`):** Reusable capabilities (Category-based).
+    - **Format:** `gcp-<category>-<name>` (e.g., `gcp-iam-groups`)
 
-#### 1. The Five Pillars
+#### 3. Strict Naming Policy
+We enforce a **Singular Purpose, Singular Naming** policy.
 
-Your contribution must fall into one of the following five core categories:
+1.  **Modules (Category-based)**
+    - **Format:** `gcp-<category>-<name>`
+    - **Example:** `modules/gcp-custom-constraints/dns-dnssec` (Constraint category - grouped in subfolder)
+    - **Example:** `modules/gcp-org-policies-core` (Org Policies category)
+    - **Note:** Do NOT use the pillar prefix (e.g., `foundation`) in module names unless it describes the category itself.
 
-- **`gcp-foundation`**: Baseline infrastructure setup and security defaults.
-- **`gcp-compliance`**: Resources specifically configured to meet regulatory standards (e.g., NIST, PCI, CIS).
-- **`gcp-constraint`**: Policy definitions and constraints to prevent violations.
-- **`gcp-detection`**: Custom threat detection pipelines and observability configurations.
-- **`gcp-triage`**: Automations for alert analysis, enrichment, and remediation workflows.
-
-#### 2. Strict Naming Convention
-
-We enforce a **Singular Purpose, Singular Naming** policy. A module must solve exactly one problem.
-
-- **Format:** `prefix-category-singular_name`
-- **Example:** A module establishing a foundation is `gcp-foundation-networking`, _not_ `gcp-foundations-networking`.
-- **Example:** A constraint module is `gcp-constraint-location`, _not_ `gcp-constraints-location`.
-#### 3. Logical Grouping (Sub-modules)
-
-For complex domains, use hierarchical prefixes to group related modules without breaking the singular purpose rule.
-
-- **Format:** `prefix-category-group-product`
-- **Example:**
-    - `gcp-foundation-ai-vertex` (AI Foundation for Vertex)
-    - `gcp-foundation-ai-ccai` (AI Foundation for Contact Center AI)
+2.  **Blueprints (Pillar-based)**
+    - **Format:** `gcp-<pillar>-<name>`
+    - **Example:** `blueprints/gcp-compliance-hipaa`
 
 #### 4. Contribution Workflow
 
