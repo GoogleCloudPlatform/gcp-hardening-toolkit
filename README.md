@@ -1,6 +1,6 @@
 # GCP Hardening Toolkit
 
-![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.3-purple)
+![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.3-935ADA)
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB)
 ![Bash](https://img.shields.io/badge/Bash-Shell-4EAA25)
 ![Release](https://img.shields.io/badge/Release-Rolling-red)
@@ -35,8 +35,6 @@ gcp-hardening-toolkit/
     - **Minimal Wrappers**: Modules are usually thin layers over Terraform resources.
     - **Value Add**: Abstraction is only added when it provides clear value (e.g., enforcing policy constraints).
 
----
-
 ## Features (Pillars)
 
 The toolkit is organized into five core pillars:
@@ -55,8 +53,6 @@ The toolkit is organized into five core pillars:
 
 5.  **Triage** (`gcp-triage`):
     Automates investigation and decision-making for security alerts, reducing alert fatigue.
-
----
 
 ## Vs Cloud Foundations Toolkit
 
@@ -85,13 +81,13 @@ terraform apply
 
 We use a **Rolling Release** model (no semantic versioning). Every commit to `main` is stable.
 
-### Hash Pinning
+### 📌 Hash Pinning
 
 We recommend pinning modules to a specific commit hash to ensure stability.
 
 ```hcl
 module "gcp_hardening" {
-  source = "github.com/GoogleCloudPlatform/gcp-hardening-toolkit//modules/gcp-iam-groups?ref=90ea035"
+  source = "https://github.com/GoogleCloudPlatform/gcp-hardening-toolkit/tree/main/modules/gcp-org-policies?ref=ab1e62f5"
   # ...
 }
 ```
