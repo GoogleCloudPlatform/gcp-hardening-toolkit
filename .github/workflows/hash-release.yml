@@ -14,12 +14,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get Short SHA
+        run: echo "SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_ENV
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # This uses the full unique hash (e.g., 8f3a2b1c...) as the tag
-          tag_name: ${{ github.sha }}
-          name: "Build ${{ github.sha }}"
+          # GitHub does not allow tags to be the full 40-char SHA (ambiguity)
+          tag_name: ${{ env.SHORT_SHA }}
+          name: "Build ${{ env.SHORT_SHA }}"
           body: "Stable release for commit ${{ github.sha }}."
           draft: false
           prerelease: false
