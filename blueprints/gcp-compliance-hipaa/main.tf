@@ -24,7 +24,7 @@ module "enable-audit-logs" {
 }
 
 module "enable-project-creation-enforcer" {
-  source              = "./modules/project-creation"
+  source              = "../../modules/gcp-project-hipaa-preconfig"
   organization_id     = var.organization_id
   enforcer_project_id = var.quota_project
 }
