@@ -1,0 +1,25 @@
+name: Hash Release
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          # This uses the full unique hash (e.g., 8f3a2b1c...) as the tag
+          tag_name: ${{ github.sha }}
+          name: "Build ${{ github.sha }}"
+          body: "Stable release for commit ${{ github.sha }}."
+          draft: false
+          prerelease: false
