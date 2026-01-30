@@ -3,7 +3,7 @@
 ![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.3-purple)
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB)
 ![Bash](https://img.shields.io/badge/Bash-Shell-4EAA25)
-![Release](https://img.shields.io/badge/Release-Rolling-blue)
+![Release](https://img.shields.io/badge/Release-Rolling-red)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 
 This repository contains a collection of curated Terraform modules designed to enhance the security posture of your Google Cloud Platform (GCP) environment. Each module is a reusable, documented, and tested component that applies a specific security best practice.
@@ -78,9 +78,23 @@ terraform apply
 
 ### Helper Scripts
 
-For specialized use cases, the toolkit includes:
 - **Bash Scripts**: For one-time setup tasks (e.g., enabling SCC services, checking VPC-SC violations).
 - **Python Scripts**: Used within Cloud Functions for advanced logic (e.g., automated project creation enforcement).
+
+## Release Cycle & Versioning
+
+We use a **Rolling Release** model (no semantic versioning). Every commit to `main` is stable.
+
+### Hash Pinning
+
+We recommend pinning modules to a specific commit hash to ensure stability.
+
+```hcl
+module "gcp_hardening" {
+  source = "github.com/GoogleCloudPlatform/gcp-hardening-toolkit//modules/gcp-iam-groups?ref=90ea035"
+  # ...
+}
+```
 
 ## Contributing
 
