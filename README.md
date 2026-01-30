@@ -14,13 +14,13 @@ The repository follows a **Library + Blueprints** architecture, decoupled to all
 
 ```text
 gcp-hardening-toolkit/
-├── blueprints/                 # 🚀 deployable solutions (stateful)
+├── blueprints/                 # deployable solutions (stateful)
 │   ├── gcp-foundation-org-iam/
 │   └── ...
-├── modules/                    # 🧩 reusable components (stateless)
+├── modules/                    # reusable components (stateless)
 │   ├── gcp-iam-groups/
-│   └── gcp-custom-constraints/ # 🛡️ org policy constraints
-└── docs/                       # 📚 detailed documentation
+│   └── gcp-custom-constraints/ # org policy constraints
+└── docs/                       # detailed documentation
 ```
 
 ### Design Principles
@@ -81,7 +81,7 @@ terraform apply
 
 We use a **Rolling Release** model (no semantic versioning). Every commit to `main` is stable.
 
-### 📌 Hash Pinning
+### Hash Pinning
 
 We recommend pinning modules to a specific commit hash to ensure stability.
 
