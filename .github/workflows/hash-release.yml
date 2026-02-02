@@ -1,0 +1,30 @@
+name: Hash Release
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Short SHA
+        run: echo "SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # GitHub does not allow tags to be the full 40-char SHA (ambiguity)
+          tag_name: ${{ env.SHORT_SHA }}
+          name: "Build ${{ env.SHORT_SHA }}"
+          body: "Stable release for commit ${{ github.sha }}."
+          draft: false
+          prerelease: false
