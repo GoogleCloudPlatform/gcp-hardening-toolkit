@@ -1,0 +1,17 @@
+# The Google Cloud project ID to use for API calls.
+project_id = "your-project-id"
+
+# The Google Cloud billing project ID to use for API calls.
+billing_project = "your-billing-project"
+
+# The parent resource to attach the policy to.
+# Must be in the format 'organizations/{organization_id}', 'folders/{folder_id}', or 'projects/{project_id}'.
+parent = "organizations/123456789012"
+
+# Toggle for SQL SOC2 constraints
+enable_sql_mysql_constraints      = true
+enable_sql_postgresql_constraints = true
+enable_sql_sqlserver_constraints  = true
+enable_alloydb_constraints        = true
+enable_dns_constraint             = true
+enable_dns_policy_logging_constraint = true
