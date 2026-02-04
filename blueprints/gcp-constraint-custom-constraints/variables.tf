@@ -73,3 +73,15 @@ variable "enable_sql_ssl_enforcement_constraint" {
   description = "Enable the Cloud SQL SSL Enforcement custom constraint."
   default     = true
 }
+
+variable "enable_storage_locked_retention_constraint" {
+  type        = bool
+  description = "Enable the Cloud Storage Locked Retention Policy custom constraint."
+  default     = true
+}
+
+variable "enable_alloydb_private_ip_constraint" {
+  type        = bool
+  description = "Enable the AlloyDB Private IP custom constraint."
+  default     = true
+}

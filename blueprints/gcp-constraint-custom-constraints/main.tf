@@ -129,3 +129,15 @@ module "sql_ssl_enforcement_constraint" {
   source = "../../modules/gcp-custom-constraints/sql/sql-ssl-enforcement-constraint"
   parent = var.parent
 }
+
+module "storage_locked_retention_constraint" {
+  count  = var.enable_storage_locked_retention_constraint ? 1 : 0
+  source = "../../modules/gcp-custom-constraints/storage/gcs-locked-retention-constraint"
+  parent = var.parent
+}
+
+module "alloydb_private_ip_constraint" {
+  count  = var.enable_alloydb_private_ip_constraint ? 1 : 0
+  source = "../../modules/gcp-custom-constraints/alloydb/private-ip-constraint"
+  parent = var.parent
+}
