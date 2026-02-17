@@ -70,3 +70,43 @@ module "dns_policy_logging_constraint" {
   source = "../../modules/gcp-custom-constraints/dns/dns-policy-logging-constraint"
   parent = var.parent
 }
+
+# BigQuery Constraints
+module "bq_dataset_cmek_constraint" {
+
+  count  = var.enable_bq_dataset_cmek_constraint ? 1 : 0
+  source = "../../modules/gcp-custom-constraints/bigquery/bq-dataset-cmek-constraint"
+  parent = var.parent
+}
+
+# Dataproc Constraints
+module "dataproc_cmek_constraint" {
+  count  = var.enable_dataproc_cmek_constraint ? 1 : 0
+  source = "../../modules/gcp-custom-constraints/dataproc/dataproc-cmek-constraint"
+  parent = var.parent
+}
+
+module "instance_no_default_sa_constraint" {
+  count  = var.enable_instance_no_default_sa_constraint ? 1 : 0
+  source = "../../modules/gcp-custom-constraints/compute/instance-no-default-sa-constraint"
+  parent = var.parent
+}
+
+module "instance_no_default_sa_full_scopes_constraint" {
+  count  = var.enable_instance_no_default_sa_full_scopes_constraint ? 1 : 0
+  source = "../../modules/gcp-custom-constraints/compute/instance-no-default-sa-full-scopes-constraint"
+  parent = var.parent
+}
+
+module "instance_no_ip_forwarding_constraint" {
+  count  = var.enable_instance_no_ip_forwarding_constraint ? 1 : 0
+  source = "../../modules/gcp-custom-constraints/compute/instance-no-ip-forwarding-constraint"
+  parent = var.parent
+}
+
+# DNS Constraints
+module "dnssec_no_rsasha1_constraint" {
+  count  = var.enable_dnssec_no_rsasha1_constraint ? 1 : 0
+  source = "../../modules/gcp-custom-constraints/dns/dnssec-no-rsasha1-constraint"
+  parent = var.parent
+}

@@ -231,3 +231,120 @@ resource "google_dns_policy" "violating_policy" {
     network_url = google_compute_network.test_network_non.id
   }
 }
+
+# 5. BigQuery - Dataset without default CMEK (Should Fail)
+resource "google_bigquery_dataset" "violating_bq_dataset" {
+
+  dataset_id = "violating_dataset_no_cmek"
+  location   = "us-central1"
+}
+
+# 6. Dataproc - Cluster without CMEK (Should Fail)
+resource "google_dataproc_cluster" "violating_dataproc_cluster" {
+  name   = "violating-dataproc-cluster"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      network    = google_compute_network.test_network_non.id
+      subnetwork = google_compute_subnetwork.test_subnetwork_non.id
+    }
+  }
+}
+
+resource "google_compute_subnetwork" "test_subnetwork_non" {
+  name          = "non-compliant-dataproc-subnet"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.test_network_non.id
+}
+
+# 7. Compute Disk - Without CSEK (Should Fail)
+resource "google_compute_disk" "violating_disk_no_csek" {
+  name = "violating-disk-no-csek"
+  type = "pd-standard"
+  zone = "us-central1-a"
+  size = 10
+}
+
+# 8. Compute Instance - Using default service account (Should Fail)
+resource "google_compute_instance" "violating_instance_default_sa" {
+  name         = "violating-instance-default-sa"
+  machine_type = "e2-micro"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.test_network_non.id
+  }
+
+  # Using default service account (implicitly)
+  # This will use PROJECT_NUMBER-compute@developer.gserviceaccount.com
+}
+
+# 9. Compute Instance - Using default SA with full scopes (Should Fail)
+resource "google_compute_instance" "violating_instance_default_sa_full_scopes" {
+  name         = "violating-instance-default-sa-full-scopes"
+  machine_type = "e2-micro"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.test_network_non.id
+  }
+
+  service_account {
+    # Using default service account with full cloud-platform scope
+    scopes = ["cloud-platform"]
+  }
+}
+
+# 10. Compute Instance - With IP forwarding enabled (Should Fail)
+resource "google_compute_instance" "violating_instance_ip_forwarding" {
+  name         = "violating-instance-ip-forwarding"
+  machine_type = "e2-micro"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.test_network_non.id
+  }
+
+  can_ip_forward = true
+}
+
+# 11. DNS - Managed zone with RSASHA1 algorithm (Should Fail)
+resource "google_dns_managed_zone" "violating_zone_rsasha1" {
+  name        = "violating-zone-rsasha1"
+  dns_name    = "violating-rsasha1.example.com."
+  description = "Violating zone with RSASHA1 DNSSEC algorithm"
+
+  dnssec_config {
+    state = "on"
+    default_key_specs {
+      algorithm  = "rsasha1"
+      key_type   = "keySigning"
+      key_length = 2048
+    }
+    default_key_specs {
+      algorithm  = "rsasha1"
+      key_type   = "zoneSigning"
+      key_length = 1024
+    }
+  }
+}

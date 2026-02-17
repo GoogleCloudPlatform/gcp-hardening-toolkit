@@ -1,10 +1,13 @@
 # GCP Compliance SOC2 Blueprint
 
-This blueprint orchestrates the deployment of custom organization policy constraints required for SOC2 compliance within a Google Cloud environment. It specifically focuses on hardening Cloud SQL database instances across MySQL, PostgreSQL, and SQL Server.
+This blueprint orchestrates the deployment of **built-in GCP organization policies** and **custom organization policy constraints** required for SOC2 compliance within a Google Cloud environment.
 
 ## Overview
 
-The SOC2 compliance blueprint provides a modular, toggle-based approach to enforcing security-critical database flags. It enables organizations to ensure that all Cloud SQL instances—regardless of engine—are configured according to rigorous security standards.
+The SOC2 compliance blueprint provides a comprehensive, modular approach to enforcing security controls across your GCP organization:
+
+- **Built-in Organization Policies**: Enforces 10 foundational GCP security constraints including compute security, storage protection, database isolation, and encryption requirements
+- **Custom Constraints**: Provides granular control over Cloud SQL, AlloyDB, DNS, BigQuery, and Compute Engine configurations with engine-specific security flags
 
 ## Security Rationale
 
@@ -18,25 +21,57 @@ The SOC2 compliance blueprint provides a modular, toggle-based approach to enfor
 
 ```
 gcp-compliance-soc2/
-├── main.tf                    # Root blueprint orchestrating SQL engine modules
-├── variables.tf               # Configuration variables with engine toggles
+├── org-policies.tf            # Built-in GCP organization policies (10 constraints)
+├── constraints.tf             # Custom organization policy constraints
+├── variables.tf               # Configuration variables with toggles
 ├── outputs.tf                 # Standardized outputs for constraint names
 ├── terraform.tfvars.example   # Example configuration template
-├── modules/                   # Symlinked or local engine modules
-│   └── sql/
-│       ├── mysql/             # MySQL specific hardening
-│       ├── postgresql/        # PostgreSQL logging & security
-│       └── sqlserver/         # SQL Server security flags
-│   └── alloydb/           # AlloyDB security constraints
-│       ├── logging-constraints/ # Log verbosity & error levels
-│       └── private-ip-constraint/ # Network isolation
-│   └── dns/               # DNS security constraints
-│       ├── dnssec-enabled-constraint/
-│       └── dns-policy-logging-constraint/
-└── tests/                    # Validation tests with engine-specific examples
+└── tests/                     # Validation tests
+
+Referenced Modules (from ../../modules/):
+├── gcp-org-policies/          # Built-in organization policies module
+└── gcp-custom-constraints/    # Custom organization policy constraints
+    ├── sql/
+    │   ├── mysql/             # MySQL specific hardening
+    │   ├── postgresql/        # PostgreSQL logging & security
+    │   └── sqlserver/         # SQL Server security flags
+    ├── alloydb/               # AlloyDB security constraints
+    │   ├── logging-constraints/
+    │   └── private-ip-constraint/
+    ├── dns/                   # DNS security constraints
+    │   ├── dnssec-enabled-constraint/
+    │   ├── dns-policy-logging-constraint/
+    │   └── dnssec-no-rsasha1-constraint/
+    ├── bigquery/              # BigQuery security constraints
+    │   └── bq-dataset-cmek-constraint/
+    ├── dataproc/              # Dataproc security constraints
+    │   └── dataproc-cmek-constraint/
+    └── compute/               # Compute security constraints
+        ├── instance-no-default-sa-constraint/
+        ├── instance-no-default-sa-full-scopes-constraint/
+        └── instance-no-ip-forwarding-constraint/
 ```
 
-## Available Constraints
+## Built-in Organization Policies
+
+The blueprint enforces 10 foundational GCP built-in organization policy constraints for SOC2 compliance:
+
+| Constraint | Type | Enforcement | SOC2 Relevance |
+|------------|------|-------------|----------------|
+| `compute.requireVpcFlowLogs` | List | Requires VPC Flow Logs on all subnets | Network monitoring, CC6.2 |
+| `storage.uniformBucketLevelAccess` | Boolean | Enforced | Access control, CC6.1 |
+| `sql.restrictPublicIp` | Boolean | Enforced | Database security, CC6.1 |
+| `storage.publicAccessPrevention` | Boolean | Enforced | Data protection, CC6.2 |
+| `compute.restrictNonConfidentialComputing` | List | Requires confidential computing | Data encryption, CC6.6 |
+| `compute.skipDefaultNetworkCreation` | Boolean | Enforced | Network security |
+| `gcp.restrictNonCmekServices` | List | Requires CMEK encryption | Encryption control, CC6.6 |
+| `compute.requireOsLogin` | Boolean | Enforced | Access control, CC6.1 |
+| `compute.disableSerialPortAccess` | Boolean | Enforced | Access control |
+| `compute.vmExternalIpAccess` | List | Denies external IPs | Network security |
+
+**Configuration**: These policies are managed through the `gcp-org-policies` module and can be toggled using `enable_soc2_org_policies = true` (default).
+
+## Custom Constraints
 
 | Engine | Toggle Variable | Implemented Controls |
 |---|---|---|
@@ -140,6 +175,13 @@ terraform apply --auto-approve -parallelism=1
 | `enable_alloydb_constraints` | Enable AlloyDB SOC2 constraints | `bool` | `true` | no |
 | `enable_dns_constraint` | Enable DNSSEC custom constraint | `bool` | `true` | no |
 | `enable_dns_policy_logging_constraint` | Enable Cloud DNS Policy Logging custom constraint | `bool` | `true` | no |
+| `enable_soc2_org_policies` | Enable built-in organization policies for SOC2 | `bool` | `true` | no |
+| `organization_id` | Organization ID (format: organizations/ID) | `string` | `""` | no |
+| `parent_folder` | Folder ID (format: folders/ID) | `string` | `""` | no |
+| `domains_to_allow` | List of allowed domains for IAM policy members | `list(string)` | `[]` | no |
+| `allowed_resource_locations` | List of allowed resource locations | `list(string)` | `["us-east4", "us-central1"]` | no |
+| `trusted_image_projects` | List of allowed trusted image projects | `list(string)` | `[]` | no |
+| `essential_contacts_domains_to_allow` | List of allowed domains for essential contacts | `list(string)` | `[]` | no |
 
 ## Outputs
 

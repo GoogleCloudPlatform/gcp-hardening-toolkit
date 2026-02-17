@@ -48,3 +48,37 @@ output "dns_policy_logging_constraint_name" {
   description = "Name of the DNS Policy Logging constraint"
   value       = var.enable_dns_policy_logging_constraint ? module.dns_policy_logging_constraint[0].custom_constraint_name : null
 }
+
+# BigQuery Constraint Outputs
+output "bq_dataset_cmek_constraint_name" {
+
+  description = "Name of the BigQuery dataset CMEK constraint"
+  value       = var.enable_bq_dataset_cmek_constraint ? module.bq_dataset_cmek_constraint[0].custom_constraint_name : null
+}
+
+# Dataproc Constraint Outputs
+output "dataproc_cmek_constraint_name" {
+  description = "Name of the Dataproc cluster CMEK constraint"
+  value       = var.enable_dataproc_cmek_constraint ? module.dataproc_cmek_constraint[0].custom_constraint_name : null
+}
+
+output "instance_no_default_sa_constraint_name" {
+  description = "Name of the instance no default service account constraint"
+  value       = var.enable_instance_no_default_sa_constraint ? module.instance_no_default_sa_constraint[0].custom_constraint_name : null
+}
+
+output "instance_no_default_sa_full_scopes_constraint_name" {
+  description = "Name of the instance no default SA with full scopes constraint"
+  value       = var.enable_instance_no_default_sa_full_scopes_constraint ? module.instance_no_default_sa_full_scopes_constraint[0].custom_constraint_name : null
+}
+
+output "instance_no_ip_forwarding_constraint_name" {
+  description = "Name of the instance no IP forwarding constraint"
+  value       = var.enable_instance_no_ip_forwarding_constraint ? module.instance_no_ip_forwarding_constraint[0].custom_constraint_name : null
+}
+
+# DNS Constraint Outputs
+output "dnssec_no_rsasha1_constraint_name" {
+  description = "Name of the DNSSEC no RSASHA1 constraint"
+  value       = var.enable_dnssec_no_rsasha1_constraint ? module.dnssec_no_rsasha1_constraint[0].custom_constraint_name : null
+}

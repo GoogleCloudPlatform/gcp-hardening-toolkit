@@ -88,6 +88,7 @@ module "restrict_protocol_fowarding" {
 # *******************************************/
 
 module "org_domain_restricted_sharing" {
+  count   = length(var.domains_to_allow) > 0 ? 1 : 0
   source  = "terraform-google-modules/org-policy/google//modules/domain_restricted_sharing"
   version = "~> 7.0"
 
@@ -146,4 +147,55 @@ module "resource_location_restriction" {
   allow             = var.allowed_resource_locations
   allow_list_length = length(var.allowed_resource_locations)
   constraint        = "constraints/gcp.resourceLocations"
+}
+
+/******************************************
+  Restrict Non-Confidential Computing
+*******************************************/
+
+module "restrict_non_confidential_computing" {
+  source  = "terraform-google-modules/org-policy/google"
+  version = "~> 7.1.0"
+
+  organization_id   = local.organization_id
+  folder_id         = local.folder_id
+  policy_for        = local.policy_for
+  policy_type       = "list"
+  allow             = var.allowed_non_confidential_computing
+  allow_list_length = length(var.allowed_non_confidential_computing)
+  constraint        = "constraints/compute.restrictNonConfidentialComputing"
+}
+
+/******************************************
+  Restrict Non-CMEK Services
+*******************************************/
+
+module "restrict_non_cmek_services" {
+  source  = "terraform-google-modules/org-policy/google"
+  version = "~> 7.1.0"
+
+  organization_id   = local.organization_id
+  folder_id         = local.folder_id
+  policy_for        = local.policy_for
+  policy_type       = "list"
+  deny              = var.denied_non_cmek_services
+  deny_list_length  = length(var.denied_non_cmek_services)
+  constraint        = "constraints/gcp.restrictNonCmekServices"
+}
+
+/******************************************
+  Require VPC Flow Logs
+*******************************************/
+
+module "require_vpc_flow_logs" {
+  source  = "terraform-google-modules/org-policy/google"
+  version = "~> 7.1.0"
+
+  organization_id   = local.organization_id
+  folder_id         = local.folder_id
+  policy_for        = local.policy_for
+  policy_type       = "list"
+  allow             = var.allowed_vpc_flow_logs_settings
+  allow_list_length = length(var.allowed_vpc_flow_logs_settings)
+  constraint        = "constraints/compute.requireVpcFlowLogs"
 }
