@@ -35,7 +35,7 @@ variable "create_access_context_manager_access_policy" {
 
 variable "domains_to_allow" {
   type        = list(string)
-  description = "The list of domains to allow for domain restricted sharing."
+  description = "The list of domains (IDs) to allow for domain restricted sharing (constraints/iam.allowedPolicyMemberDomains). This constraint requires at least one domain."
   default     = []
 }
 
@@ -61,4 +61,22 @@ variable "trusted_image_projects" {
   type        = list(string)
   description = "The list of allowed trusted image projects."
   default     = []
+}
+
+variable "allowed_non_confidential_computing" {
+  type        = list(string)
+  description = "List of VM types allowed without confidential computing. Empty list means all VMs must use confidential computing."
+  default     = []
+}
+
+variable "denied_non_cmek_services" {
+  type        = list(string)
+  description = "List of services to restrict from using non-CMEK encryption (constraints/gcp.restrictNonCmekServices). Example: ['storage.googleapis.com', 'bigquery.googleapis.com']."
+  default     = []
+}
+
+variable "allowed_vpc_flow_logs_settings" {
+  type        = list(string)
+  description = "List of allowed VPC Flow Logs settings. Use predefined values: 'ESSENTIAL' (10-50% sampling), 'LIGHT' (50-100% sampling), 'COMPREHENSIVE' (100% sampling). Empty list enforces VPC Flow Logs with no specific sampling rate requirement."
+  default     = ["ESSENTIAL", "LIGHT", "COMPREHENSIVE"]
 }

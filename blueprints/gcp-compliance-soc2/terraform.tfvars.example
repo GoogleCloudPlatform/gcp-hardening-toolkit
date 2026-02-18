@@ -1,0 +1,48 @@
+# The Google Cloud project ID to use for API calls.
+project_id = "your-project-id"
+
+# The Google Cloud billing project ID to use for API calls.
+billing_project = "your-billing-project"
+
+# The parent resource to attach the policy to.
+# Must be in the format 'organizations/{organization_id}', 'folders/{folder_id}', or 'projects/{project_id}'.
+parent = "organizations/123456789012"
+
+# Toggle for SQL SOC2 constraints
+enable_sql_mysql_constraints      = true
+enable_sql_postgresql_constraints = true
+enable_sql_sqlserver_constraints  = true
+enable_alloydb_constraints        = true
+enable_dns_constraint             = true
+enable_dns_policy_logging_constraint = true
+
+# BigQuery Constraints
+enable_bq_dataset_cmek_constraint = true
+
+# Dataproc Constraints
+enable_dataproc_cmek_constraint = true
+
+# Compute Constraints
+enable_instance_no_default_sa_constraint             = true
+enable_instance_no_default_sa_full_scopes_constraint = true
+enable_instance_no_ip_forwarding_constraint          = true
+
+# DNS Constraints
+enable_dnssec_no_rsasha1_constraint = true
+
+# Built-in Organization Policies for SOC2
+enable_soc2_org_policies = true
+
+# Domain restrictions for IAM (update with your organization's domain)
+domains_to_allow = ["example.com"]
+
+# CMEK services hardening
+denied_non_cmek_services = [
+  "storage.googleapis.com",
+  "bigquery.googleapis.com",
+  "compute.googleapis.com",
+  "sqladmin.googleapis.com"
+]
+
+# Resource location restrictions
+allowed_resource_locations = ["us-east4", "us-central1"]
