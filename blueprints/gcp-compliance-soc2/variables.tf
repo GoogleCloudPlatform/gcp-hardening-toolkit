@@ -147,3 +147,9 @@ variable "denied_non_cmek_services" {
   description = "List of services to restrict from using non-CMEK encryption. Example: ['storage.googleapis.com', 'bigquery.googleapis.com']."
   default     = ["storage.googleapis.com", "bigquery.googleapis.com", "compute.googleapis.com", "sqladmin.googleapis.com"]
 }
+
+variable "log_project_id" {
+  description = "The ID of the project where the BigQuery dataset will be created."
+  type        = string
+  default     = null
+}
