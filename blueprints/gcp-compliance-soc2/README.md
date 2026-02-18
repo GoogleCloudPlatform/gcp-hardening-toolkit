@@ -71,6 +71,15 @@ The blueprint enforces 10 foundational GCP built-in organization policy constrai
 
 **Configuration**: These policies are managed through the `gcp-org-policies` module and can be toggled using `enable_soc2_org_policies = true` (default).
 
+## Cloud Audit Logging
+
+The blueprint configures **Cloud Audit Logging** to ensure comprehensive activity tracking across your organization and projects, a critical requirement for SOC2 compliance.
+
+- **Organization Level**: Enables `ADMIN_READ`, `DATA_READ`, and `DATA_WRITE` logs for `allServices`.
+- **Project Level**: Enables `ADMIN_READ`, `DATA_READ`, and `DATA_WRITE` logs for `allServices` in the specified `log_project_id`.
+
+This ensures that all administrative actions and data access/modifications are logged for audit trails.
+
 ## Custom Constraints
 
 | Engine | Toggle Variable | Implemented Controls |
@@ -182,6 +191,7 @@ terraform apply --auto-approve -parallelism=1
 | `allowed_resource_locations` | List of allowed resource locations | `list(string)` | `["us-east4", "us-central1"]` | no |
 | `trusted_image_projects` | List of allowed trusted image projects | `list(string)` | `[]` | no |
 | `essential_contacts_domains_to_allow` | List of allowed domains for essential contacts | `list(string)` | `[]` | no |
+| `log_project_id` | Project ID for enabling project-level audit logs | `string` | `null` | no |
 
 ## Outputs
 
