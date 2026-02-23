@@ -1,5 +1,14 @@
 #!/bin/bash
 
+echo "============================================================"
+echo "         GCP Project Security Triage and Enumeration        "
+echo "============================================================"
+echo ""
+echo "This script performs a rapid security assessment of a GCP project."
+echo "It covers project metadata, IAM policies, network configurations,"
+echo "and Cloud DNS settings (Private DNS & DNSSEC)."
+echo ""
+
 # Define trusted domains here (space-separated or on new lines)
 TRUSTED_DOMAINS=(
   "google.com"
@@ -40,7 +49,7 @@ echo "projectId: $projectId"
 echo "projectNumber: $projectNumber"
 
 # ==========================================
-# Section 1: External / Untrusted Users
+# Section 1: IAM Assessment
 # ==========================================
 echo ""
 echo "========================================"
@@ -80,6 +89,23 @@ if [ -n "$untrusted_users" ]; then
   echo -e "${YELLOW}$(echo -e "$untrusted_users" | sed '/^$/d' | sed 's/^/  - /')${NC}"
 else
   echo "External / Untrusted User Accounts: None"
+fi
+
+# Privileged Roles Check (Owner/Editor)
+privileged_accounts=$(gcloud asset search-all-iam-policies \
+  --scope=projects/${projectId} \
+  --format="json" 2>/dev/null | jq -r '
+    .[]
+    | .policy.bindings[]
+    | select(.role == "roles/owner" or .role == "roles/editor")
+    | .members[]
+  ' | sort -u)
+
+if [ -n "$privileged_accounts" ]; then
+  echo -e "${YELLOW}Privileged Accounts (Owner/Editor) Found:${NC}"
+  echo -e "${YELLOW}$(echo "$privileged_accounts" | sed '/^$/d' | sed 's/^/  - /')${NC}"
+else
+  echo "Privileged Accounts (Owner/Editor): None"
 fi
 
 # ==========================================
@@ -130,4 +156,90 @@ else
   echo "Open to the internet (0.0.0.0/0): None"
 fi
 
+# ==========================================
+# Section 3: Cloud DNS Assessment
+# ==========================================
+echo ""
 echo "========================================"
+echo "Cloud DNS Assessment:"
+echo "========================================"
+
+# Get all networks
+networks=$(gcloud compute networks list --project="$projectId" --format="value(name)")
+
+# Get all private managed zones and their details (including networks and DNSSEC state)
+# We use 'json' format and jq to parse it reliably.
+private_managed_zones_json=$(gcloud dns managed-zones list --project="$projectId" --filter="visibility=private" --format="json" 2>/dev/null)
+
+echo "Checking Private DNS activation for each VPC network:"
+echo "Private DNS Enabled:"
+for network in $networks; do
+  network_url="https://www.googleapis.com/compute/v1/projects/$projectId/global/networks/$network"
+  is_private_dns_enabled="DISABLED"
+
+  # Check if this network is associated with any private managed zone
+  if echo "$private_managed_zones_json" | jq -e '.[] | select(.privateVisibilityConfig.networks[]?.networkUrl == "'"$network_url"'")' &>/dev/null; then
+    is_private_dns_enabled="ENABLED"
+  fi
+
+  if [ "$is_private_dns_enabled" = "ENABLED" ]; then
+    echo "  - $network: ENABLED"
+  else
+    echo -e "${YELLOW}  - $network: DISABLED${NC}"
+  fi
+done
+
+echo ""
+echo "Checking DNSSEC activation for each VPC network:"
+echo "DNSSEC Enabled:"
+for network in $networks; do
+  network_url="https://www.googleapis.com/compute/v1/projects/$projectId/global/networks/$network"
+  dnssec_status="DISABLED"
+
+  # Check if any private managed zone associated with this network has DNSSEC enabled
+  if echo "$private_managed_zones_json" | jq -e '.[] | select(.privateVisibilityConfig.networks[]?.networkUrl == "'"$network_url"'") | select(.dnssecConfig.state == "on" or .dnssecConfig.state == "transfer")' &>/dev/null; then
+    dnssec_status="ENABLED"
+  fi
+
+  if [ "$dnssec_status" = "ENABLED" ]; then
+    echo "  - $network: ENABLED"
+  else
+    echo -e "${YELLOW}  - $network: DISABLED${NC}"
+  fi
+done
+
+# ==========================================
+# Section 4: Service Account Key Assessment
+# ==========================================
+echo ""
+echo "========================================"
+echo "Service Account Key Assessment:"
+echo "========================================"
+
+all_sa_keys=""
+service_accounts=$(gcloud iam service-accounts list --project="$projectId" --format="value(email)")
+
+for sa in $service_accounts; do
+  keys=$(gcloud iam service-accounts keys list --iam-account="$sa" --project="$projectId" --format="value(name)")
+  if [ -n "$keys" ]; then
+    for key in $keys; do
+      all_sa_keys="$all_sa_keys$sa - $key\n"
+    done
+  fi
+done
+
+if [ -n "$all_sa_keys" ]; then
+  echo -e "${YELLOW}Service Account Keys Found:${NC}"
+  echo -e "${YELLOW}$(echo -e "$all_sa_keys" | sed '/^$/d' | sed 's/^/  - /')${NC}"
+else
+  echo "Service Account Keys: None"
+fi
+
+echo ""
+echo "============================================================"
+echo "         GCP Project Security Triage - Scan Complete        "
+echo "============================================================"
+echo ""
+echo "Important findings and potential issues are highlighted in yellow."
+echo "Review the output above for a comprehensive security overview."
+echo ""

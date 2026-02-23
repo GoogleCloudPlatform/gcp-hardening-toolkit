@@ -4,12 +4,20 @@ This blueprint provides a simple Bash script designed to perform a rapid securit
 
 ## Overview
 
-The `enum-project.sh` script gathers essential project metadata, assesses IAM policies for untrusted users, and performs a basic network assessment.
+The `enum-project.sh` script provides a comprehensive security overview of a GCP project. It starts with a clear welcome message, details its scope, and concludes with a summary, highlighting important findings in yellow.
 
-It checks for:
-- **Project Metadata**: Creation time, lifecycle state, parent details, and project number.
-- **IAM Assessment**: Identifies users external to a defined list of trusted domains.
-- **Network Assessment**: Checks for the existence of the default VPC, details the total number of VPC networks, and highlights any firewall rules allowing inbound traffic from the internet (`0.0.0.0/0`).
+It assesses the following areas:
+- **Project Metadata**: Gathers essential details like creation time, lifecycle state, parent information, and project number.
+- **IAM Assessment**:
+  - Identifies user accounts from outside a defined list of trusted domains.
+  - Highlights highly privileged accounts with "Owner" or "Editor" roles.
+- **Network Assessment**:
+  - Checks for the existence of the default VPC.
+  - Details the total number of VPC networks.
+  - Highlights any firewall rules allowing inbound traffic from the public internet (`0.0.0.0/0`).
+- **Cloud DNS Assessment**:
+  - Checks if Private DNS is enabled on all VPC networks.
+  - Verifies if DNSSEC is enabled for private managed zones.
 
 ## Prerequisites
 
@@ -19,13 +27,21 @@ It checks for:
 
 ## Usage
 
-1. Open `enum-project.sh` and edit the `TRUSTED_DOMAINS` array at the top of the script to include your organization's allowed domains:
-   ```bash
-   TRUSTED_DOMAINS=(
-     "yourdomain.com"
-   )
-   ```
-2. Run the script by passing the target GCP project ID as an argument:
-   ```bash
-   ./enum-project.sh <project-id>
-   ```
+1.  Open `enum-project.sh` and edit the `TRUSTED_DOMAINS` array to include your organization's allowed domains:
+    ```bash
+    TRUSTED_DOMAINS=(
+      "yourdomain.com"
+    )
+    ```
+2.  Run the script by passing the target GCP project ID as an argument:
+    ```bash
+    ./enum-project.sh <project-id>
+    ```
+
+## Output
+
+The script's output is designed for clarity:
+- A **welcome message** at the start explains the script's scope.
+- **Section headers** organize the findings for easy review.
+- **Yellow highlighting** is used to draw attention to important findings and potential security risks.
+- A **footer message** confirms the completion of the scan.
