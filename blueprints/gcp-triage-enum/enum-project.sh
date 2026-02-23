@@ -58,7 +58,7 @@ untrusted_users=""
 for user in $all_users; do
   user_domain="${user#*@}"
   is_trusted=0
-  
+
   if [ ${#TRUSTED_DOMAINS[@]} -gt 0 ]; then
     for trusted_domain in "${TRUSTED_DOMAINS[@]}"; do
       if [[ "$user_domain" == "$trusted_domain" ]]; then
@@ -109,16 +109,16 @@ else
 fi
 
 # Firewall Rules Check (Open to the internet)
-# Using JSON and jq to safely parse the nested objects. 
+# Using JSON and jq to safely parse the nested objects.
 # This completely bypasses the gcloud formatting bugs.
 fw_allow_all_ips=$(gcloud compute firewall-rules list \
   --project="$projectId" \
   --filter="direction=INGRESS" \
   --format="json" 2>/dev/null | jq -r '
-    .[] 
-    | select(.sourceRanges[]? == "0.0.0.0/0") 
-    | .allowed[]? 
-    | .IPProtocol as $proto 
+    .[]
+    | select(.sourceRanges[]? == "0.0.0.0/0")
+    | .allowed[]?
+    | .IPProtocol as $proto
     | if .ports then (.ports[] | $proto + ":" + .) else $proto end
   ' | sort -u)
 

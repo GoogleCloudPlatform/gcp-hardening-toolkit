@@ -4,7 +4,7 @@ This blueprint provides a simple Bash script designed to perform a rapid securit
 
 ## Overview
 
-The `enum-project.sh` script gathers essential project metadata, assesses IAM policies for untrusted users, and performs a basic network assessment. 
+The `enum-project.sh` script gathers essential project metadata, assesses IAM policies for untrusted users, and performs a basic network assessment.
 
 It checks for:
 - **Project Metadata**: Creation time, lifecycle state, parent details, and project number.
