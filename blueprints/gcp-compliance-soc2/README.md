@@ -1,6 +1,6 @@
 # GCP Compliance SOC2 Blueprint
 
-This blueprint orchestrates the deployment of **built-in GCP organization policies** and **custom organization policy constraints** required for SOC2 compliance within a Google Cloud environment.
+This blueprint orchestrates the deployment of **built-in GCP organization policies**, **custom organization policy constraints**, and **Security Health Analytics (SHA) built-in detectors** required for SOC2 compliance within a Google Cloud environment.
 
 ## Overview
 
@@ -8,6 +8,7 @@ The SOC2 compliance blueprint provides a comprehensive, modular approach to enfo
 
 - **Built-in Organization Policies**: Enforces 10 foundational GCP security constraints including compute security, storage protection, database isolation, and encryption requirements
 - **Custom Constraints**: Provides granular control over Cloud SQL, AlloyDB, DNS, BigQuery, and Compute Engine configurations with engine-specific security flags
+- **SHA Built-in Detectors**: Enables 9 native SCC Security Health Analytics detectors covering audit logging, KMS key hygiene, data exposure, and IAM least-privilege / separation of duties via `enable_sha_modules.sh`
 
 ## Security Rationale
 
@@ -23,6 +24,8 @@ The SOC2 compliance blueprint provides a comprehensive, modular approach to enfo
 gcp-compliance-soc2/
 ├── org-policies.tf            # Built-in GCP organization policies (10 constraints)
 ├── constraints.tf             # Custom organization policy constraints
+├── audit-logs.tf              # Cloud Audit Logging configuration
+├── enable_sha_modules.sh      # Script to enable built-in SHA detectors for SOC2
 ├── variables.tf               # Configuration variables with toggles
 ├── outputs.tf                 # Standardized outputs for constraint names
 ├── terraform.tfvars.example   # Example configuration template
@@ -90,6 +93,34 @@ This ensures that all administrative actions and data access/modifications are l
 | [AlloyDB](../../modules/gcp-custom-constraints/alloydb/private-ip-constraint/README.md) | `enable_alloydb_constraints` | `private IP`, `log_error_verbosity`, `log_min_error_statement`, `log_min_messages` |
 | [DNSSEC](../../modules/gcp-custom-constraints/dns/dnssec-enabled-constraint/README.md) | `enable_dns_constraint` | `DNSSEC enabled` |
 | [DNS Logging](../../modules/gcp-custom-constraints/dns/dns-policy-logging-constraint/README.md) | `enable_dns_policy_logging_constraint` | `Cloud DNS Policy Logging` |
+
+## Security Health Analytics (SHA) Built-in Modules
+
+The blueprint includes `enable_sha_modules.sh` — a shell script that enables **9 native SCC Security Health Analytics detectors** at the organization level using the `gcloud` CLI. These are managed-by-Google detectors (not custom CEL modules) and are toggled on/off via the SCC service settings API.
+
+| Detector ID | Severity | SOC 2 Criterion |
+|---|---|---|
+| `CLOUD_ASSET_API_DISABLED` | MEDIUM | CC6.1 – asset visibility |
+| `AUDIT_LOGGING_DISABLED` | HIGH | CC6.1, CC6.2 – audit trail |
+| `KMS_PUBLIC_KEY` | CRITICAL | CC6.1, CC6.7 – encryption key exposure |
+| `PUBLIC_DATASET` | CRITICAL | CC6.1, CC6.7 – data access control |
+| `KMS_KEY_NOT_ROTATED` | HIGH | CC6.1, CC6.8 – key lifecycle management |
+| `ESSENTIAL_CONTACTS_NOT_CONFIGURED` | MEDIUM | CC2.2 – operational communication |
+| `KMS_ROLE_SEPARATION` | HIGH | CC6.3 – separation of duties (KMS) |
+| `SERVICE_ACCOUNT_ROLE_SEPARATION` | HIGH | CC6.3 – separation of duties (SA) |
+| `ADMIN_SERVICE_ACCOUNT` | CRITICAL | CC6.3 – least privilege (SA admin) |
+
+### Usage
+
+```bash
+cd blueprints/gcp-compliance-soc2
+
+# Edit ORGANIZATION_ID and QUOTA_PROJECT at the top of the script, then:
+./enable_sha_modules.sh
+```
+
+> [!NOTE]
+> These detectors are enabled at the **organization level** via the SCC API and are separate from Terraform-managed resources. They do not appear in Terraform state.
 
 ## Quick Start
 
@@ -185,13 +216,7 @@ terraform apply --auto-approve -parallelism=1
 | `enable_dns_constraint` | Enable DNSSEC custom constraint | `bool` | `true` | no |
 | `enable_dns_policy_logging_constraint` | Enable Cloud DNS Policy Logging custom constraint | `bool` | `true` | no |
 | `enable_soc2_org_policies` | Enable built-in organization policies for SOC2 | `bool` | `true` | no |
-| `organization_id` | Organization ID (format: organizations/ID) | `string` | `""` | no |
 | `parent_folder` | Folder ID (format: folders/ID) | `string` | `""` | no |
-| `domains_to_allow` | List of allowed domains for IAM policy members | `list(string)` | `[]` | no |
-| `allowed_resource_locations` | List of allowed resource locations | `list(string)` | `["us-east4", "us-central1"]` | no |
-| `trusted_image_projects` | List of allowed trusted image projects | `list(string)` | `[]` | no |
-| `essential_contacts_domains_to_allow` | List of allowed domains for essential contacts | `list(string)` | `[]` | no |
-| `log_project_id` | Project ID for enabling project-level audit logs | `string` | `null` | no |
 
 ## Outputs
 
