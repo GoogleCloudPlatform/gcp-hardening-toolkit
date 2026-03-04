@@ -1,0 +1,10 @@
+[project]
+name = "agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "google-adk>=1.26.0",
+    "scc-mcp>=0.1.0",
+]

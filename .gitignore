@@ -72,3 +72,12 @@ ehthumbs.db
 .verify_venv
 .verify_venv_2
 venv
+
+# Environment variables
+.env
+
+# Agent
+.adk
+
+# Python
+__pycache__
