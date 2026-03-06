@@ -138,7 +138,7 @@ module "restrict_contact_domains" {
 
 module "resource_location_restriction" {
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 7.1.0"
+  version = "~> 7.2.0"
 
   organization_id   = local.organization_id
   folder_id         = local.folder_id
@@ -155,7 +155,7 @@ module "resource_location_restriction" {
 
 module "restrict_non_confidential_computing" {
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 7.1.0"
+  version = "~> 7.2.0"
 
   organization_id   = local.organization_id
   folder_id         = local.folder_id
@@ -172,7 +172,7 @@ module "restrict_non_confidential_computing" {
 
 module "restrict_non_cmek_services" {
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 7.1.0"
+  version = "~> 7.2.0"
 
   organization_id   = local.organization_id
   folder_id         = local.folder_id
@@ -189,7 +189,7 @@ module "restrict_non_cmek_services" {
 
 module "require_vpc_flow_logs" {
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 7.1.0"
+  version = "~> 7.2.0"
 
   organization_id   = local.organization_id
   folder_id         = local.folder_id
