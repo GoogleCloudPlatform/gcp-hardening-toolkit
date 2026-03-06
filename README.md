@@ -56,9 +56,9 @@ The toolkit is organized into five core pillars:
 
 ## GHT vs. Cloud Foundation Toolkit (CFT)
 
-We get this question a lot, so let's make the difference between the GCP Hardening Toolkit (GHT) and the Cloud Foundation Toolkit (CFT) CRYSTAL CLEAR. 
+We get this question a lot, so let's make the difference between the GCP Hardening Toolkit (GHT) and the Cloud Foundation Toolkit (CFT) CRYSTAL CLEAR.
 
-While GHT includes several foundational examples, these are meant to be thin and leverage CFT to deploy standard infrastructure. GHT is an open-source tool built with a completely different vision and utility in mind. 
+While GHT includes several foundational examples, these are meant to be thin and leverage CFT to deploy standard infrastructure. GHT is an open-source tool built with a completely different vision and utility in mind.
 
 ### The Core Difference: Brownfield vs. Greenfield
 
@@ -67,9 +67,9 @@ While GHT includes several foundational examples, these are meant to be thin and
 
 ### The Pain Point GHT Solves
 
-When teams conduct a Cloud Security Posture Review (CSPR), they get a clear picture of their security posture. But knowing the problems you have doesn't mean you know how to solve them without breaking production. 
+When teams conduct a Cloud Security Posture Review (CSPR), they get a clear picture of their security posture. But knowing the problems you have doesn't mean you know how to solve them without breaking production.
 
-Usually, security teams must manually review the environment, negotiate with stakeholders, and implement restrictive policies while trying not to disrupt DevOps. This causes tremendous operational friction. 
+Usually, security teams must manually review the environment, negotiate with stakeholders, and implement restrictive policies while trying not to disrupt DevOps. This causes tremendous operational friction.
 
 ### The GHT Advantage: Triage and State-Aware Remediation
 
