@@ -6,7 +6,7 @@
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 ![Release](https://img.shields.io/badge/Release-Rolling-4B5563)
 
-The GCP Hardening Toolkit (GHT) is an automated triage and remediation engine designed to safely manage security debt in complex, active (brownfield) Google Cloud environments. 
+The GCP Hardening Toolkit (GHT) is an automated triage and remediation engine designed to safely manage security debt in complex, active (brownfield) Google Cloud environments.
 
 While standard foundational toolkits provide blueprints for building from scratch, GHT is engineered for the realities of existing infrastructure. It combines state-aware Infrastructure as Code (IaC) with active triage automation, empowering security task forces to rapidly audit environments, identify vulnerabilities, and deploy incremental compliance guardrails—without disrupting active DevOps pipelines.
 
@@ -141,7 +141,7 @@ We recommend pinning modules to a specific commit hash to ensure stability.
 module "gcp_hardening" {
   # The standard Terraform GitHub shorthand with the // subdirectory separator
   source = "github.com/GoogleCloudPlatform/gcp-hardening-toolkit//modules/gcp-org-policies?ref=ab1e62f5"
-  
+
   # ...
 }
 ```
