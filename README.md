@@ -16,6 +16,9 @@ The repository follows a **Library + Blueprints** architecture, decoupled to all
 
 ```text
 gcp-hardening-toolkit/
+├── agent/                      # agentic solution for automated hardening
+│   └── state-exporter/
+│       └── ...
 ├── blueprints/                 # deployable solutions (stateful)
 │   ├── gcp-foundation-org-iam/
 │   └── ...
