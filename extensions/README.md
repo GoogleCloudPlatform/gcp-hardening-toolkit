@@ -25,7 +25,7 @@ gemini extensions install REPOSITORY_URL
 ```
 
 ### 2. Verify Connection
-The extension uses the Google-hosted BigQuery MCP server. 
+The extension uses the Google-hosted BigQuery MCP server.
 
 Ensure the BigQuery MCP server is enabled in your project:
 ```bash
