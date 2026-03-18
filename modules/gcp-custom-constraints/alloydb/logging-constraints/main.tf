@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+terraform {
+  required_version = ">= 1.3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.45.2"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.9"
+    }
+  }
+}
+
 resource "random_string" "constraint_suffix" {
   length  = 4
   special = false
@@ -21,35 +39,35 @@ resource "random_string" "constraint_suffix" {
 }
 
 resource "google_org_policy_custom_constraint" "alloydb_log_error_verbosity" {
-  name         = "custom.alloydbLogErrorVerbosity${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_error_verbosity flag for AlloyDB instances"
-  description  = "Ensures log_error_verbosity is set to 'default'."
-  action_type  = "DENY"
-  condition    = "resource.databaseFlags.exists(key, key == 'log_error_verbosity') && resource.databaseFlags['log_error_verbosity'] != 'default'"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.alloydbLogErrorVerbosity${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_error_verbosity flag for AlloyDB instances"
+  description    = "Ensures log_error_verbosity is set to 'default'."
+  action_type    = "DENY"
+  condition      = "resource.databaseFlags.exists(key, key == 'log_error_verbosity') && resource.databaseFlags['log_error_verbosity'] != 'default'"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["alloydb.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "alloydb_log_min_error_statement" {
-  name         = "custom.alloydbLogMinErrorStatement${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_min_error_statement flag for AlloyDB instances"
-  description  = "Ensures log_min_error_statement is set to 'error'."
-  action_type  = "DENY"
-  condition    = "!(resource.databaseFlags.exists(key, key == 'log_min_error_statement') && resource.databaseFlags['log_min_error_statement'] == 'error')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.alloydbLogMinErrorStatement${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_min_error_statement flag for AlloyDB instances"
+  description    = "Ensures log_min_error_statement is set to 'error'."
+  action_type    = "DENY"
+  condition      = "!(resource.databaseFlags.exists(key, key == 'log_min_error_statement') && resource.databaseFlags['log_min_error_statement'] == 'error')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["alloydb.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "alloydb_log_min_messages" {
-  name         = "custom.alloydbLogMinMessages${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_min_messages flag for AlloyDB instances"
-  description  = "Ensures log_min_messages is set to 'warning'."
-  action_type  = "DENY"
-  condition    = "!(resource.databaseFlags.exists(key, key == 'log_min_messages') && resource.databaseFlags['log_min_messages'] == 'warning')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.alloydbLogMinMessages${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_min_messages flag for AlloyDB instances"
+  description    = "Ensures log_min_messages is set to 'warning'."
+  action_type    = "DENY"
+  condition      = "!(resource.databaseFlags.exists(key, key == 'log_min_messages') && resource.databaseFlags['log_min_messages'] == 'warning')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["alloydb.googleapis.com/Instance"]
 }
 
@@ -67,7 +85,7 @@ resource "google_org_policy_policy" "enforce_alloydb_logging_constraints" {
   for_each = {
     log_error_verbosity     = google_org_policy_custom_constraint.alloydb_log_error_verbosity.name
     log_min_error_statement = google_org_policy_custom_constraint.alloydb_log_min_error_statement.name
-    log_min_messages       = google_org_policy_custom_constraint.alloydb_log_min_messages.name
+    log_min_messages        = google_org_policy_custom_constraint.alloydb_log_min_messages.name
   }
   name   = "${var.parent}/policies/${each.value}"
   parent = var.parent

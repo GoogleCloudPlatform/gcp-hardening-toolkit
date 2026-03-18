@@ -1,11 +1,13 @@
 terraform {
+  required_version = ">= 1.3.0"
   required_providers {
     google = {
       source  = "hashicorp/google"
       version = ">= 5.45.2"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
+      version = ">= 3.0"
     }
   }
 }
@@ -42,7 +44,7 @@ resource "google_alloydb_cluster" "violating_alloydb_cluster" {
   cluster_id = "violating-alloydb-cluster"
   location   = "us-central1"
   network_config {
-    network    = google_compute_network.test_network_non.id
+    network = google_compute_network.test_network_non.id
   }
 
   initial_user {
@@ -205,7 +207,7 @@ resource "google_sql_database_instance" "violating_sqlserver_contained_auth" {
       value = "on"
     }
     ip_configuration {
-        ssl_mode        = "ALLOW_UNENCRYPTED_AND_ENCRYPTED"
+      ssl_mode = "ALLOW_UNENCRYPTED_AND_ENCRYPTED"
     }
   }
   deletion_protection = false

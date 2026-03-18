@@ -1,11 +1,13 @@
 terraform {
+  required_version = ">= 1.3.0"
   required_providers {
     google = {
       source  = "hashicorp/google"
       version = ">= 5.45.2"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
+      version = ">= 3.0"
     }
   }
 }
@@ -155,7 +157,7 @@ resource "google_alloydb_cluster" "compliant_alloydb_cluster" {
   cluster_id = "compliant-alloydb-cluster"
   location   = "us-central1"
   network_config {
-  network    = google_compute_network.test_network.id
+    network = google_compute_network.test_network.id
 
   }
 

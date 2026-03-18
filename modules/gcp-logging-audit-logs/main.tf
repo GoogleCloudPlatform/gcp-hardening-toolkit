@@ -1,3 +1,12 @@
+terraform {
+  required_version = ">= 1.3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.45.2"
+    }
+  }
+}
 
 resource "google_organization_iam_audit_config" "org_audit_config" {
   org_id  = var.organization_id

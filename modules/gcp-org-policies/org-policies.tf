@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+terraform {
+  required_version = ">= 1.3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.45.2"
+    }
+  }
+}
+
 locals {
   organization_id = var.parent_folder != "" ? null : var.organization_id
   folder_id       = var.parent_folder != "" ? var.parent_folder : null
@@ -174,13 +184,13 @@ module "restrict_non_cmek_services" {
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 7.2.0"
 
-  organization_id   = local.organization_id
-  folder_id         = local.folder_id
-  policy_for        = local.policy_for
-  policy_type       = "list"
-  deny              = var.denied_non_cmek_services
-  deny_list_length  = length(var.denied_non_cmek_services)
-  constraint        = "constraints/gcp.restrictNonCmekServices"
+  organization_id  = local.organization_id
+  folder_id        = local.folder_id
+  policy_for       = local.policy_for
+  policy_type      = "list"
+  deny             = var.denied_non_cmek_services
+  deny_list_length = length(var.denied_non_cmek_services)
+  constraint       = "constraints/gcp.restrictNonCmekServices"
 }
 
 /******************************************

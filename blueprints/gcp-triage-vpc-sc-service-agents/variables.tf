@@ -30,8 +30,8 @@ variable "folder_id" {
   type        = string
 }
 
-variable "region" {
-  description = "The region to create the resources in."
-  type        = string
-  default     = "us-central1"
-}
+# variable "region" {
+#   description = "The region to create the resources in."
+#   type        = string
+#   default     = "us-central1"
+# }

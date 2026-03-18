@@ -112,11 +112,6 @@ variable "enable_soc2_org_policies" {
   default     = true
 }
 
-variable "parent_folder" {
-  type        = string
-  description = "The folder ID where policies will be applied. Leave empty if using organization_id."
-  default     = ""
-}
 
 variable "domains_to_allow" {
   type        = list(string)
@@ -146,10 +141,4 @@ variable "denied_non_cmek_services" {
   type        = list(string)
   description = "List of services to restrict from using non-CMEK encryption. Example: ['storage.googleapis.com', 'bigquery.googleapis.com']."
   default     = ["storage.googleapis.com", "bigquery.googleapis.com", "compute.googleapis.com", "sqladmin.googleapis.com"]
-}
-
-variable "log_project_id" {
-  description = "The ID of the project where the BigQuery dataset will be created."
-  type        = string
-  default     = null
 }

@@ -1,3 +1,21 @@
+terraform {
+  required_version = ">= 1.3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.45.2"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.9"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = ">= 2.0"
+    }
+  }
+}
+
 resource "google_project_service" "cloudfunctions" {
   project = var.enforcer_project_id
   service = "cloudfunctions.googleapis.com"
