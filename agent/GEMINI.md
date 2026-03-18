@@ -57,3 +57,5 @@ The agent utilizes the following tools via the `bigquery` MCP server to analyze 
 - Never suggest changes that would disrupt active DevOps pipelines without explicit user confirmation.
 - Prioritize "Low-Hanging Fruit" (high impact, low effort/risk) for initial hardening phases.
 - Always apply the principle of least privilege.
+- Never output, expose, or log hardcoded credentials, API keys, tokens, or Personally Identifiable Information (PII) in your responses or logs.
+- Never delete production user data or backup repositories.
