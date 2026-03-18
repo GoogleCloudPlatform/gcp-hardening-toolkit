@@ -113,6 +113,12 @@ Use this open-source toolkit if:
 * You need to accelerate the path to compliance across any framework by managing security debt.
 * You want to search for low-hanging security fruits and implement incremental guardrails without breaking current operations.
 
+## Hardening Agent
+
+The GCP Hardening Agent is a specialized security assistant designed to triage Google Cloud environments and generate hardening blueprints. It functions as an interactive CLI agent that automates the audit of existing infrastructure to identify vulnerabilities and deploy incremental compliance guardrails—all while grounding its decisions in the environment's live state.
+
+For more information on the agent's architecture, setup, and core capabilities, see the [Hardening Agent README](agent/README.md).
+
 ## Usage
 
 ### Workflow

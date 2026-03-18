@@ -1,91 +1,78 @@
 # GCP Hardening Agent
 
-This directory contains various components for the GCP Hardening Agent, such as exporters, extensions, and other related functionalities for automated hardening of GCP environments.
+The GCP Hardening Agent is a professional security engineering assistant designed to triage Google Cloud environments and generate actionable hardening blueprints. It operates as a specialized extension for the **Gemini CLI**, enabling an interactive and automated approach to managing security debt in complex, brownfield environments.
 
-## state-exporter
+## Basic Install and Setup
 
-The `state-exporter` sub-directory contains scripts to export GCP resource configurations. For detailed information on its functionality, prerequisites, and usage, please refer to its dedicated README: [`state-exporter/README.md`](state-exporter/README.md)
+### Prerequisites
 
-# Gemini Extension: Hardening Agent
+Ensure the following tools are installed and configured:
 
-The **Hardening Agent** is a specialized security assistant designed to triage GCP environments and generate hardening blueprints. It leverages the Model Context Protocol (MCP) to query BigQuery, which acts as the central hub for security telemetry, logs, and asset inventory.
+- **Gemini CLI**: The agent functions as a native extension of the Gemini CLI environment.
+- **gcloud CLI**: Required for authentication and resource management.
+- **bq command-line tool**: Necessary for querying security telemetry in BigQuery.
+- **Terraform (>= 1.3)**: For deploying generated hardening blueprints.
 
-## 🏗️ System Architecture
+### Initial Setup (Context Enrichment)
 
-The agent integrates modules, discovery scripts, and human-in-the-loop (HITL) input to produce actionable security outcomes.
+To enable the agent to analyze your environment effectively, you must first populate its central hub (BigQuery) with your environment's state. The scripts in the `state-exporter` directory are **essential prerequisites** for this context enrichment process.
 
-*   **Central Hub:** BigQuery (connected via MCP).
-*   **Data Ingestion Sources:**
-    *   **IAM:** Identity and Access Management monitoring.
-    *   **Asset Inventory:** Real-time visibility of GCP resources.
-    *   **Cloud Logging:** Audit and flow logs.
-    *   **Cloud Firewall Rules:** Network security posture.
-    *   **Security Command Center (SCC):** Threat detection and vulnerabilities.
-*   **Infrastructure State:** Processes `.tfstate` from **Cloud Storage** to correlate live assets with Terraform-managed resources.
+#### Project-level Export
 
-## ⚙️ Setup & Configuration
+1. Navigate to the state-exporter directory:
+   ```bash
+   cd agent/state-exporter
+   ```
 
-To use this extension in the **Gemini CLI**, you need to install it by running the following command:
+2. Export Cloud Asset Inventory (CAI) resources for a specific project:
+   ```bash
+   ./export_cai_state.sh YOUR_GCP_PROJECT_ID
+   ```
+   Replace `YOUR_GCP_PROJECT_ID` with your project's ID.
 
-# TODO
-```bash
-gemini extensions install https://github.com/GoogleCloudPlatform/gcp-hardening-toolkit
-```
+#### Organization-level Export
 
-### 2. Verify Connection
-The extension uses the Google-hosted BigQuery MCP server.
+1. Export CAI resources for an entire organization:
+   ```bash
+   ./export_cai_org_state.sh YOUR_ORG_ID YOUR_BILLING_PROJECT_ID
+   ```
+   Replace `YOUR_ORG_ID` and `YOUR_BILLING_PROJECT_ID` with the appropriate IDs.
 
-Ensure the BigQuery MCP server is enabled in your project:
-```bash
-gcloud beta services mcp enable bigquery.googleapis.com --project=PROJECT_ID
-```
+### Verification
 
-Also make sure you have active Google Cloud credentials:
-```bash
-gcloud auth application-default login
-```
+After triggering an export, verify the operation's status using the gcloud command provided in the script's output (e.g., `gcloud asset operations describe ...`). Once complete, the BigQuery tables will be populated and ready for the agent to analyze.
 
----
+## Role & Expertise
 
-## 🛠️ BigQuery MCP Integration
+The Hardening Agent acts as a professional security peer, providing:
 
-The extension connects to the Google-hosted BigQuery MCP server.
+- **Posture Interpretation**: Analyzing Cloud Asset Inventory (CAI) data and security telemetry stored in BigQuery to identify vulnerabilities.
+- **Consultative Hardening**: Asking the user about specific hardening requirements and constraints.
+- **Blueprint Generation**: Designing and implementing new, custom Terraform blueprints (e.g., `ght-agent-generated-blueprint`) by leveraging the toolkit's stateless modules.
 
-- **MCP Server Name:** `bigquery`
-- **Server URL:** `https://bigquery.googleapis.com/mcp`
-- **Auth Provider:** `google_credentials`
-- **OAuth Scopes:** `https://www.googleapis.com/auth/bigquery`
+## System Architecture
 
-### Available Tools
+The agent operates as a Gemini CLI extension, integrating modules, discovery scripts, and user input to produce actionable security outcomes.
 
-The following tools are available via the `bigquery` MCP server:
+- **Central Hub**: BigQuery (connected via Model Context Protocol - MCP) containing Cloud Asset Inventory data.
+- **Codebase Access**: The agent is grounded in the `gcp-hardening-toolkit` repository, allowing it to read and reuse existing `modules/` and `blueprints/`.
 
-| Tool Name | Description | Hardening Use Case |
-| :--- | :--- | :--- |
-| `list_datasets` | Lists datasets in a project. | Identifying security-related telemetry datasets. |
-| `list_tables` | Lists tables in a dataset. | Locating specific log tables (e.g., Firewall or Audit). |
-| `get_schema` | Retrieves table schemas. | Mapping SCC findings or Asset Inventory metadata. |
-| `execute_sql` | Executes BigQuery SQL queries. | Identifying over-privileged accounts or open ports. |
-| `list_jobs` | Lists recent BigQuery jobs. | Auditing agent activity and data access. |
+## Core Capabilities
 
-### Limitations
+The agent utilizes BigQuery tools to analyze the environment:
 
-- **Query Timeout:** The `execute_sql` tool limits query processing time to **3 minutes**. Queries exceeding this limit are automatically canceled.
-- **External Tables:** Does not support querying Google Drive external tables.
+- **Data Fetching**: Querying CAI resources, IAM bindings, and firewall rules.
+- **Misconfiguration Identification**: Identifying over-privileged accounts, open network ports, and missing security controls.
+- **Incremental Hardening**: Recommending and generating blueprints for non-disruptive remediation.
 
-## 🔄 Operational Workflow
+## Operational Workflow
 
-1.  **Triage:** Uses `execute_sql` to pull data from **Asset Inventory** and **Cloud Firewall Rules**.
-2.  **Discovery:** Correlates **SCC** findings with **Cloud Logging**.
-3.  **State Reconciliation:** Reads `.tfstate` to align with Infrastructure-as-Code.
-4.  **Blueprint Generation:** Outputs a finalized **Hardening Blueprint**.
+1. **Triage & Enrichment**: The agent verifies the presence of CAI data in BigQuery. If missing, it recommends running the `state-exporter` scripts.
+2. **Requirement Gathering**: The agent consults with the user to define hardening goals and constraints.
+3. **Blueprint Generation**: Based on the gathered requirements, the agent generates a new, ready-to-deploy blueprint using appropriate toolkit modules.
 
-## 💡 Sample Prompts
+## Sub-components
 
-- "List the datasets in project `PROJECT_ID`."
-- "Find the top firewall deny logs in dataset `DATASET_ID` for project `PROJECT_ID`."
-- "Show the schema for the `assets` table in project `PROJECT_ID`."
-- "Run a query to find all service accounts with the Owner role in project `PROJECT_ID`."
+### State Exporter
 
----
-*For more information, see the [official BigQuery MCP documentation](https://docs.cloud.google.com/bigquery/docs/use-bigquery-mcp).*
+The `state-exporter` directory contains the critical scripts needed to export your GCP environment's live state for analysis. For more details, see [agent/state-exporter/README.md](state-exporter/README.md).
