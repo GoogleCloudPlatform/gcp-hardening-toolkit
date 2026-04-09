@@ -10,13 +10,14 @@ The GCP Hardening Toolkit (GHT) is an automated triage and remediation engine de
 
 While standard foundational toolkits provide blueprints for building from scratch, GHT is engineered for the realities of existing infrastructure. It combines state-aware Infrastructure as Code (IaC) with active triage automation, empowering security task forces to rapidly audit environments, identify vulnerabilities, and deploy incremental compliance guardrails—without disrupting active DevOps pipelines.
 
-## Repository Strucure
+## Repository Structure
 
 The repository follows a **Library + Blueprints** architecture, decoupled to allow flexible composition.
 
 ```text
 gcp-hardening-toolkit/
 ├── agent/                      # agentic solution for automated hardening
+│   ├── custom-role-creation/   # custom IAM role definitions (least privilege)
 │   └── state-exporter/
 │       └── ...
 ├── blueprints/                 # deployable solutions (stateful)
