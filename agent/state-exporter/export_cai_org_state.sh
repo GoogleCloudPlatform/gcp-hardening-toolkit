@@ -23,7 +23,10 @@ TABLE_NAME="org_cai_state_${TIMESTAMP}"
 # Note: The table path for Org exports uses the 'projects/...' syntax for the destination
 FULLY_QUALIFIED_TABLE="projects/${BILLING_PROJECT}/datasets/${DATASET_NAME}/tables/${TABLE_NAME}"
 
-echo "Initiating Organization-wide CAI export for Org: ${ORG_ID}..."
+IAM_TABLE_NAME="org_iam_policy_${TIMESTAMP}"
+FULLY_QUALIFIED_IAM_TABLE="projects/${BILLING_PROJECT}/datasets/${DATASET_NAME}/tables/${IAM_TABLE_NAME}"
+
+echo "Initiating Organization-wide CAI resource export for Org: ${ORG_ID}..."
 
 # We use --organization and --billing-project to cross the project boundary
 EXPORT_OUT=$(gcloud asset export \
@@ -36,15 +39,32 @@ EXPORT_OUT=$(gcloud asset export \
 
 echo "$EXPORT_OUT"
 
-# Extract Operation Path
-OP_PATH=$(echo "$EXPORT_OUT" | grep -oE "organizations/[0-9]+/operations/ExportAssets/[a-zA-Z]+/[a-f0-9]+")
+# Extract Operation Path with support for underscores
+OP_PATH=$(echo "$EXPORT_OUT" | grep -oE "organizations/[0-9]+/operations/ExportAssets/[a-zA-Z_]+/[a-f0-9]+")
 
-if [[ -z "$OP_PATH" ]]; then
-  echo "Execution aborted: Failed to extract operation path. Check permissions."
+echo "Initiating Organization-wide CAI IAM policy export for Org: ${ORG_ID}..."
+
+EXPORT_IAM_OUT=$(gcloud asset export \
+  --organization="${ORG_ID}" \
+  --billing-project="${BILLING_PROJECT}" \
+  --content-type=iam-policy \
+  --bigquery-table="${FULLY_QUALIFIED_IAM_TABLE}" \
+  --output-bigquery-force 2>&1)
+
+echo "$EXPORT_IAM_OUT"
+
+# Extract Operation Path for IAM export
+OP_PATH_IAM=$(echo "$EXPORT_IAM_OUT" | grep -oE "organizations/[0-9]+/operations/ExportAssets/[a-zA-Z_]+/[a-f0-9]+")
+
+if [[ -z "$OP_PATH" ]] || [[ -z "$OP_PATH_IAM" ]]; then
+  echo "Execution aborted: Failed to extract operation path for one or both exports. Check permissions."
   exit 1
 fi
 
 echo "----------------------------------------------------------------"
-echo "Org Export Triggered successfully."
-echo "Check status: gcloud asset operations describe \"${OP_PATH}\" --billing-project=\"${BILLING_PROJECT}\""
-echo "Data destination: ${BILLING_PROJECT}.${DATASET_NAME}.${TABLE_NAME}"
+echo "Org Exports Triggered successfully."
+echo "To check resource export status: gcloud asset operations describe \"${OP_PATH}\" --billing-project=\"${BILLING_PROJECT}\""
+echo "To check IAM policy export status: gcloud asset operations describe \"${OP_PATH_IAM}\" --billing-project=\"${BILLING_PROJECT}\""
+echo "Data destinations:"
+echo "  Resource Table: ${BILLING_PROJECT}.${DATASET_NAME}.${TABLE_NAME}"
+echo "  IAM Policy Table: ${BILLING_PROJECT}.${DATASET_NAME}.${IAM_TABLE_NAME}"

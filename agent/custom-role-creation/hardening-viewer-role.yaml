@@ -1,0 +1,21 @@
+title: "GCP Hardening Agent Viewer"
+description: "Custom role for GCP Hardening Agent with read-only permissions."
+stage: "GA"
+includedPermissions:
+  - bigquery.datasets.get
+  - bigquery.tables.get
+  - bigquery.tables.getData
+  - bigquery.tables.list
+  - bigquery.jobs.create
+  - bigquery.jobs.list
+  - bigquery.datasets.get
+  - bigquery.readsessions.create
+  - bigquery.readsessions.getData
+  - bigquery.readsessions.update
+  - bigquery.tables.list
+  - bigquery.tables.get
+  - bigquery.tables.getData
+  - bigquery.config.get
+  - bigquery.datasets.getIamPolicy
+  - bigquery.capacityCommitments.get
+  - bigquery.capacityCommitments.list

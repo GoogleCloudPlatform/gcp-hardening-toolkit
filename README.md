@@ -10,13 +10,14 @@ The GCP Hardening Toolkit (GHT) is an automated triage and remediation engine de
 
 While standard foundational toolkits provide blueprints for building from scratch, GHT is engineered for the realities of existing infrastructure. It combines state-aware Infrastructure as Code (IaC) with active triage automation, empowering security task forces to rapidly audit environments, identify vulnerabilities, and deploy incremental compliance guardrails—without disrupting active DevOps pipelines.
 
-## Repository Strucure
+## Repository Structure
 
 The repository follows a **Library + Blueprints** architecture, decoupled to allow flexible composition.
 
 ```text
 gcp-hardening-toolkit/
 ├── agent/                      # agentic solution for automated hardening
+│   ├── custom-role-creation/   # custom IAM role definitions (least privilege)
 │   └── state-exporter/
 │       └── ...
 ├── blueprints/                 # deployable solutions (stateful)
@@ -117,7 +118,18 @@ Use this open-source toolkit if:
 
 The GCP Hardening Agent is a specialized security assistant designed to triage Google Cloud environments and generate hardening blueprints. It functions as an interactive CLI agent that automates the audit of existing infrastructure to identify vulnerabilities and deploy incremental compliance guardrails—all while grounding its decisions in the environment's live state.
 
-For more information on the agent's architecture, setup, and core capabilities, see the [Hardening Agent README](agent/README.md).
+### Running the Agent
+
+The GCP Hardening Agent is an interactive assistant that automates the audit of existing infrastructure and generates hardening blueprints based on the live state of your environment.
+
+To run the agent, you need to perform context enrichment by exporting your GCP environment's state to BigQuery.
+
+Key functionalities include:
+- **Postural Analysis**: Audits live environment state (via BigQuery) to identify vulnerabilities.
+- **IAM Audit**: Identifies over-privileged accounts and primitive role assignments.
+- **Blueprint Generation**: Automatically creates tailored Terraform blueprints for incremental hardening.
+
+For complete, step-by-step instructions on how to install, configure, and run the agent, please refer to the **[Hardening Agent README](agent/README.md)**.
 
 ## Usage
 
