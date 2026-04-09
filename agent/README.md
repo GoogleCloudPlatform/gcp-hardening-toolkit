@@ -4,6 +4,14 @@ The GCP Hardening Agent is a professional security engineering assistant designe
 
 ## Basic Install and Setup
 
+### Installation
+
+To install the Hardening Agent as a Gemini CLI extension, run:
+
+```bash
+gemini extensions install https://github.com/GoogleCloudPlatform/gcp-hardening-toolkit
+```
+
 ### Prerequisites
 
 Ensure the following tools are installed and configured:
