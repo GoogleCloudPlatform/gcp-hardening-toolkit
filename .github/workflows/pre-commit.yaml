@@ -21,7 +21,7 @@ jobs:
         tflint_version: latest
 
     - name: Setup terraform-docs
-      uses: lablabs/setup-terraform-docs@v1
+      uses: terraform-docs/setup-terraform-docs@v1
       with:
         terraform_docs_version: latest
 
