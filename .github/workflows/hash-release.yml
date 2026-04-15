@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Fetch all history for proper git diff analysis
 
       - name: Generate Enterprise Tag
         run: |
@@ -25,9 +27,19 @@ jobs:
       - name: Check for Agent Changes
         id: agent_check
         run: |
-          # Check if GEMINI.md or the manifest itself changed in the current push
-          # We check the diff between HEAD and the previous commit (HEAD^)
-          if git diff --name-only HEAD^ HEAD | grep -E 'agent/GEMINI.md|gemini-extension.json'; then
+          # Use the built-in before and after SHAs for a push event to check all changed files
+          # Handle the case where the 'before' SHA might not exist (e.g., a new branch push)
+          BEFORE_SHA="${{ github.event.before }}"
+          AFTER_SHA="${{ github.event.after }}"
+
+          if [[ "${BEFORE_SHA}" == "0000000000000000000000000000000000000000" ]]; then
+            # If no previous commit, we can check just the current HEAD or assume change
+            CHANGES=$(git ls-files | grep -E 'agent/GEMINI.md|gemini-extension.json' || true)
+          else
+            CHANGES=$(git diff --name-only ${BEFORE_SHA} ${AFTER_SHA} | grep -E 'agent/GEMINI.md|gemini-extension.json' || true)
+          fi
+
+          if [[ -n "$CHANGES" ]]; then
             echo "AGENT_CHANGED=true" >> $GITHUB_ENV
           else
             echo "AGENT_CHANGED=false" >> $GITHUB_ENV
