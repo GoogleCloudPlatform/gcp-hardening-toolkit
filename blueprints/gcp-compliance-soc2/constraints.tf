@@ -15,6 +15,7 @@
  */
 
 terraform {
+  required_version = ">= 1.3.0"
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -60,13 +61,13 @@ module "alloydb_logging_constraints" {
 }
 
 module "dns_dnssec_enabled_constraint" {
-  count = var.enable_dns_constraint ? 1 : 0
+  count  = var.enable_dns_constraint ? 1 : 0
   source = "../../modules/gcp-custom-constraints/dns/dnssec-enabled-constraint"
   parent = var.parent
 }
 
 module "dns_policy_logging_constraint" {
-  count = var.enable_dns_policy_logging_constraint ? 1 : 0
+  count  = var.enable_dns_policy_logging_constraint ? 1 : 0
   source = "../../modules/gcp-custom-constraints/dns/dns-policy-logging-constraint"
   parent = var.parent
 }

@@ -27,11 +27,7 @@ variable "parent_folder" {
   default     = ""
 }
 
-variable "create_access_context_manager_access_policy" {
-  type        = bool
-  description = "Create an access context manager access policy."
-  default     = false
-}
+
 
 variable "domains_to_allow" {
   type        = list(string)

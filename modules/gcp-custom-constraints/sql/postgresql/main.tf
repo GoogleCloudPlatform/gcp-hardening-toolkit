@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+terraform {
+  required_version = ">= 1.3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.45.2"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.9"
+    }
+  }
+}
+
 resource "random_string" "constraint_suffix" {
   length  = 4
   special = false
@@ -21,79 +39,79 @@ resource "random_string" "constraint_suffix" {
 }
 
 resource "google_org_policy_custom_constraint" "postgresql_log_connections" {
-  name         = "custom.postgresqlLogConnections${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_connections flag for PostgreSQL instances"
-  description  = "Ensures log_connections is set to 'on'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_connections' && f.value == 'on')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.postgresqlLogConnections${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_connections flag for PostgreSQL instances"
+  description    = "Ensures log_connections is set to 'on'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_connections' && f.value == 'on')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "postgresql_log_disconnections" {
-  name         = "custom.postgresqlLogDisconnections${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_disconnections flag for PostgreSQL instances"
-  description  = "Ensures log_disconnections is set to 'on'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_disconnections' && f.value == 'on')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.postgresqlLogDisconnections${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_disconnections flag for PostgreSQL instances"
+  description    = "Ensures log_disconnections is set to 'on'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_disconnections' && f.value == 'on')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "postgresql_log_error_verbosity" {
-  name         = "custom.postgresqlLogErrorVerbosity${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_error_verbosity flag for PostgreSQL instances"
-  description  = "Ensures log_error_verbosity is set to 'default'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('POSTGRES') && resource.settings.databaseFlags.exists(f, f.name == 'log_error_verbosity' && f.value != 'default')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.postgresqlLogErrorVerbosity${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_error_verbosity flag for PostgreSQL instances"
+  description    = "Ensures log_error_verbosity is set to 'default'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('POSTGRES') && resource.settings.databaseFlags.exists(f, f.name == 'log_error_verbosity' && f.value != 'default')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "postgresql_log_min_duration_statement" {
-  name         = "custom.postgresqlLogMinDurationStatement${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_min_duration_statement flag for PostgreSQL instances"
-  description  = "Ensures log_min_duration_statement is set to '-1' (disabled)."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('POSTGRES') && resource.settings.databaseFlags.exists(f, f.name == 'log_min_duration_statement' && f.value != '-1')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.postgresqlLogMinDurationStatement${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_min_duration_statement flag for PostgreSQL instances"
+  description    = "Ensures log_min_duration_statement is set to '-1' (disabled)."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('POSTGRES') && resource.settings.databaseFlags.exists(f, f.name == 'log_min_duration_statement' && f.value != '-1')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "postgresql_log_min_error_statement" {
-  name         = "custom.postgresqlLogMinErrorStatement${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_min_error_statement flag for PostgreSQL instances"
-  description  = "Ensures log_min_error_statement is set to 'error'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_min_error_statement' && f.value == 'error')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.postgresqlLogMinErrorStatement${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_min_error_statement flag for PostgreSQL instances"
+  description    = "Ensures log_min_error_statement is set to 'error'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_min_error_statement' && f.value == 'error')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "postgresql_log_min_messages" {
-  name         = "custom.postgresqlLogMinMessages${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_min_messages flag for PostgreSQL instances"
-  description  = "Ensures log_min_messages is set to 'warning'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_min_messages' && f.value == 'warning')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.postgresqlLogMinMessages${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_min_messages flag for PostgreSQL instances"
+  description    = "Ensures log_min_messages is set to 'warning'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_min_messages' && f.value == 'warning')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "postgresql_log_statement" {
-  name         = "custom.postgresqlLogStatement${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enforce log_statement flag for PostgreSQL instances"
-  description  = "Ensures log_statement is set to 'ddl'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_statement' && f.value == 'ddl')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.postgresqlLogStatement${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enforce log_statement flag for PostgreSQL instances"
+  description    = "Ensures log_statement is set to 'ddl'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('POSTGRES') && !resource.settings.databaseFlags.exists(f, f.name == 'log_statement' && f.value == 'ddl')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
@@ -113,12 +131,12 @@ resource "time_sleep" "wait_for_postgresql_constraints" {
 # Policies
 resource "google_org_policy_policy" "postgresql_logging_policies" {
   for_each = {
-    postgresqlLogConnections           = google_org_policy_custom_constraint.postgresql_log_connections.name
-    postgresqlLogDisconnections        = google_org_policy_custom_constraint.postgresql_log_disconnections.name
-    postgresqlLogErrorVerbosity        = google_org_policy_custom_constraint.postgresql_log_error_verbosity.name
-    postgresqlLogMinDurationStatement  = google_org_policy_custom_constraint.postgresql_log_min_duration_statement.name
-    postgresqlLogMinErrorStatement     = google_org_policy_custom_constraint.postgresql_log_min_error_statement.name
-    postgresqlLogMinMessages           = google_org_policy_custom_constraint.postgresql_log_min_messages.name
+    postgresqlLogConnections          = google_org_policy_custom_constraint.postgresql_log_connections.name
+    postgresqlLogDisconnections       = google_org_policy_custom_constraint.postgresql_log_disconnections.name
+    postgresqlLogErrorVerbosity       = google_org_policy_custom_constraint.postgresql_log_error_verbosity.name
+    postgresqlLogMinDurationStatement = google_org_policy_custom_constraint.postgresql_log_min_duration_statement.name
+    postgresqlLogMinErrorStatement    = google_org_policy_custom_constraint.postgresql_log_min_error_statement.name
+    postgresqlLogMinMessages          = google_org_policy_custom_constraint.postgresql_log_min_messages.name
     postgresqlLogStatement            = google_org_policy_custom_constraint.postgresql_log_statement.name
   }
   name   = "${var.parent}/policies/${each.value}"

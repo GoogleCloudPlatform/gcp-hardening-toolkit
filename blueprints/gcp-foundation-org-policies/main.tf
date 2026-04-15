@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+terraform {
+  required_version = ">= 1.3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.45.2"
+    }
+  }
+}
+
 # This file is the main entrypoint for the gcp-foundation-org-policies module.
 
 module "org_policies" {

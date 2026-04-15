@@ -1,3 +1,17 @@
+terraform {
+  required_version = ">= 1.3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.45.2"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.9"
+    }
+  }
+}
+
 ################################################################################
 # Notification Channel (Used by all alerts)
 ################################################################################

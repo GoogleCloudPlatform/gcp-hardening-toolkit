@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+terraform {
+  required_version = ">= 1.3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.45.2"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.0"
+    }
+  }
+}
+
 # Resource to generate a random, 6-character hex string.
 resource "random_string" "suffix" {
   length  = 6

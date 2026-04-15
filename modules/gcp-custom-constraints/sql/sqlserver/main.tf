@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+terraform {
+  required_version = ">= 1.3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.45.2"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.9"
+    }
+  }
+}
+
 resource "random_string" "constraint_suffix" {
   length  = 4
   special = false
@@ -21,79 +39,79 @@ resource "random_string" "constraint_suffix" {
 }
 
 resource "google_org_policy_custom_constraint" "sqlserver_external_scripts_enabled" {
-  name         = "custom.sqlserverExternalScriptsEnabled${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Disable external scripts for SQL Server"
-  description  = "Ensures 'external scripts enabled' is set to 'off'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'external scripts enabled' && f.value == 'on')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.sqlserverExternalScriptsEnabled${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Disable external scripts for SQL Server"
+  description    = "Ensures 'external scripts enabled' is set to 'off'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'external scripts enabled' && f.value == 'on')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "sqlserver_trace_flag_3625" {
-  name         = "custom.sqlserverTraceFlag3625${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Enable Trace Flag 3625 for SQL Server"
-  description  = "Ensures '3625 (trace flag)' is set to 'on'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('SQLSERVER') && !resource.settings.databaseFlags.exists(f, f.name == '3625' && f.value == 'on')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.sqlserverTraceFlag3625${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Enable Trace Flag 3625 for SQL Server"
+  description    = "Ensures '3625 (trace flag)' is set to 'on'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('SQLSERVER') && !resource.settings.databaseFlags.exists(f, f.name == '3625' && f.value == 'on')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "sqlserver_contained_db_auth" {
-  name         = "custom.sqlserverContainedDbAuth${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Disable contained database authentication for SQL Server"
-  description  = "Ensures 'contained database authentication' is set to 'off'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'contained database authentication' && f.value == 'on')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.sqlserverContainedDbAuth${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Disable contained database authentication for SQL Server"
+  description    = "Ensures 'contained database authentication' is set to 'off'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'contained database authentication' && f.value == 'on')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "sqlserver_cross_db_chaining" {
-  name         = "custom.sqlserverCrossDbChaining${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Disable cross db ownership chaining for SQL Server"
-  description  = "Ensures 'cross db ownership chaining' is set to 'off'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'cross db ownership chaining' && f.value == 'on')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.sqlserverCrossDbChaining${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Disable cross db ownership chaining for SQL Server"
+  description    = "Ensures 'cross db ownership chaining' is set to 'off'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'cross db ownership chaining' && f.value == 'on')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "sqlserver_remote_access" {
-  name         = "custom.sqlserverRemoteAccess${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Disable remote access for SQL Server"
-  description  = "Ensures 'remote access' is set to 'off'."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('SQLSERVER') && !resource.settings.databaseFlags.exists(f, f.name == 'remote access' && f.value == 'off')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.sqlserverRemoteAccess${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Disable remote access for SQL Server"
+  description    = "Ensures 'remote access' is set to 'off'."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('SQLSERVER') && !resource.settings.databaseFlags.exists(f, f.name == 'remote access' && f.value == 'off')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "sqlserver_user_connections" {
-  name         = "custom.sqlserverUserConnections${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Restrict user connections for SQL Server"
-  description  = "Ensures 'user connections' is set to '0' (none/default)."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'user connections' && f.value != '0')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.sqlserverUserConnections${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Restrict user connections for SQL Server"
+  description    = "Ensures 'user connections' is set to '0' (none/default)."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'user connections' && f.value != '0')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
 resource "google_org_policy_custom_constraint" "sqlserver_user_options" {
-  name         = "custom.sqlserverUserOptions${random_string.constraint_suffix.result}"
-  parent       = var.parent
-  display_name = "Restrict user options for SQL Server"
-  description  = "Ensures 'user options' is set to 'none' (or empty)."
-  action_type  = "DENY"
-  condition    = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'user options' && f.value != 'none' && f.value != '0')"
-  method_types = ["CREATE", "UPDATE"]
+  name           = "custom.sqlserverUserOptions${random_string.constraint_suffix.result}"
+  parent         = var.parent
+  display_name   = "Restrict user options for SQL Server"
+  description    = "Ensures 'user options' is set to 'none' (or empty)."
+  action_type    = "DENY"
+  condition      = "resource.databaseVersion.startsWith('SQLSERVER') && resource.settings.databaseFlags.exists(f, f.name == 'user options' && f.value != 'none' && f.value != '0')"
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["sqladmin.googleapis.com/Instance"]
 }
 
