@@ -45,22 +45,24 @@ jobs:
             echo "AGENT_CHANGED=false" >> $GITHUB_ENV
           fi
 
-      - name: Update Manifest Version
+      - name: Update Manifest and Create Tag
         if: env.AGENT_CHANGED == 'true'
         run: |
-          # Use jq to update the literal version in the JSON (optional, if you want it committed)
-          # Alternatively, we can just rely on the placeholder if we set it in the environment
-          # But committing the literal version is cleaner for distribution.
-          jq '.version = "${{ env.RELEASE_TAG }}"' gemini-extension.json > temp.json && mv temp.json gemini-extension.json
-
-      - name: Commit and Push Version Change
-        if: env.AGENT_CHANGED == 'true'
-        run: |
+          # Configure Git
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Update the manifest version locally
+          jq '.version = "${{ env.RELEASE_TAG }}"' gemini-extension.json > temp.json && mv temp.json gemini-extension.json
+
+          # Create a local commit and tag it.
+          # This commit exists ONLY for the tag and is never pushed to the 'main' branch.
           git add gemini-extension.json
           git commit -m "chore(release): update version to ${{ env.RELEASE_TAG }} [skip ci]"
-          git push origin main
+          git tag ${{ env.RELEASE_TAG }}
+
+          # Push ONLY the tag to origin
+          git push origin ${{ env.RELEASE_TAG }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
