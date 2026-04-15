@@ -10,9 +10,9 @@
 
 # create_access_context_manager_access_policy = true
 
-# allowed_external_ips = ["projects/PROJECT_ID/zones/ZONE/instances/INSTANCE"]
+# allowed_external_ips = ["projects/PROJECT_ID/zones/ZONE/instances/INSTANCE"] # pragma: allowlist secret
 
-organization_id = "0123456789" #pragma: allowlist secret
+organization_id = "0123456789" # pragma: allowlist secret
 
 domains_to_allow = ["example.com"]
 
