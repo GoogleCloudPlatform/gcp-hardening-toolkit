@@ -1,0 +1,20 @@
+name: Ruff Lint and Format
+
+on:
+  pull_request:
+  push:
+    branches: [main, master, dev]
+
+permissions:
+  contents: read
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/ruff-action@v3
+    - name: Run Ruff Check
+      run: ruff check .
+    - name: Run Ruff Format
+      run: ruff format --check .

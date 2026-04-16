@@ -1,0 +1,39 @@
+name: Update Extension Version
+
+on:
+  pull_request:
+    paths:
+      - 'agent/GEMINI.md'
+      - 'gemini-extension.json'
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Increment version in gemini-extension.json
+        run: |
+          # Use jq to increment the patch version (last number)
+          jq '.version |= (split(".") | .[2] |= (tonumber + 1 | tostring) | join("."))' gemini-extension.json > temp.json && mv temp.json gemini-extension.json
+          echo "Updated version to $(jq -r '.version' gemini-extension.json)"
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add gemini-extension.json
+          # Check if there are any changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: bump extension version [skip ci]"
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          fi
