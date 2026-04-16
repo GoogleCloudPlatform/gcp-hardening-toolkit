@@ -27,8 +27,8 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --global user.name 'ght-bot'
+          git config --global user.email '276627191+ght-bot@users.noreply.github.com'
           git add gemini-extension.json
           # Check if there are any changes to commit
           if git diff --staged --quiet; then
