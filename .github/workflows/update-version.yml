@@ -1,14 +1,14 @@
 # name: Update Extension Version
-# 
+#
 # on:
 #   workflow_dispatch:
-# 
+#
 # # on:
 # #   pull_request:
 # #     paths:
 # #       - 'agent/GEMINI.md'
 # #       - 'gemini-extension.json'
-# 
+#
 # jobs:
 #   update-version:
 #     runs-on: ubuntu-latest
@@ -21,13 +21,13 @@
 #           repository: ${{ github.event.pull_request.head.repo.full_name }}
 #           ref: ${{ github.event.pull_request.head.ref }}
 #           fetch-depth: 0
-# 
+#
 #       - name: Increment version in gemini-extension.json
 #         run: |
 #           # Use jq to increment the patch version (last number)
 #           jq '.version |= (split(".") | .[2] |= (tonumber + 1 | tostring) | join("."))' gemini-extension.json > temp.json && mv temp.json gemini-extension.json
 #           echo "Updated version to $(jq -r '.version' gemini-extension.json)"
-# 
+#
 # #      - name: Commit and push changes
 # #        run: |
 # #          git config --global user.name 'ght-bot'
