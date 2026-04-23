@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "storage": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@google-cloud/storage-mcp"
+      ],
+      "env": {
+        "GOOGLE_CLOUD_PROJECT": "$GOOGLE_CLOUD_PROJECT"
+      }
+    }
+  }
+}
