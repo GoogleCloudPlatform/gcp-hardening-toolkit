@@ -19,6 +19,7 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
+          token: ${{ secrets.BOT_PAT }}
 
       - name: Idempotency Check
         id: check_bump
