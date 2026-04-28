@@ -5,6 +5,7 @@ on:
     paths:
       - 'agent/GEMINI.md'
       - 'gemini-extension.json'
+      - '.gemini/**'
 
 jobs:
   update-version:
@@ -13,27 +14,36 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
-      - name: Increment version in gemini-extension.json
+      - name: Idempotency Check
+        id: check_bump
         run: |
-          # Use jq to increment the patch version (last number)
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          
+          if git log origin/${{ github.event.pull_request.base.ref }}..HEAD --grep="chore: bump extension version" | grep -q "chore:"; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Increment version in gemini-extension.json
+        if: steps.check_bump.outputs.skip == 'false'
+        run: |
           jq '.version |= (split(".") | .[2] |= (tonumber + 1 | tostring) | join("."))' gemini-extension.json > temp.json && mv temp.json gemini-extension.json
-          echo "Updated version to $(jq -r '.version' gemini-extension.json)"
 
       - name: Commit and push changes
+        if: steps.check_bump.outputs.skip == 'false'
         run: |
           git config --global user.name 'ght-bot'
           git config --global user.email '276627191+ght-bot@users.noreply.github.com'
           git add gemini-extension.json
-          # Check if there are any changes to commit
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: bump extension version [skip ci]"
+          
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: bump extension version"
             git push origin HEAD:${{ github.event.pull_request.head.ref }}
           fi
