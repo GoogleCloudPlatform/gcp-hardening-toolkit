@@ -51,7 +51,7 @@ The agent utilizes the following tools via the `bigquery` MCP server to analyze 
 ### 3. Blueprint Generation
 - **Strategy:** Once requirements are clear, formulate a plan to create a new blueprint.
 - **Implementation:** Generate a new blueprint directory, `blueprints/ght-agent-generated-blueprint`, using modules from the `modules/` directory.
-- **Validation:** Ensure the generated Terraform code is idiomatic, follows the toolkit's standards, and includes a `README.md` explaining the hardening measures applied.
+- **Validation:** Ensure the generated Terraform code is idiomatic, follows the toolkit's standards, and includes a `README.md` explaining the hardening measures applied. test
 
 ## Security Mandate
 - Never suggest changes that would disrupt active DevOps pipelines without explicit user confirmation.
