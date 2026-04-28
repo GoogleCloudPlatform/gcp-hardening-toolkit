@@ -32,7 +32,7 @@ echo "Initiating Organization-wide CAI resource export for Org: ${ORG_ID}..."
 EXPORT_OUT=$(gcloud asset export \
   --organization="${ORG_ID}" \
   --billing-project="${BILLING_PROJECT}" \
-  --asset-types="compute.googleapis.com/Instance,compute.googleapis.com/Firewall,iam.googleapis.com/ServiceAccount" \
+  --asset-types="compute.googleapis.com/Instance,compute.googleapis.com/Firewall,compute.googleapis.com/Address,iam.googleapis.com/ServiceAccount,iam.googleapis.com/ServiceAccountKey,accesscontextmanager.googleapis.com/ServicePerimeter,accesscontextmanager.googleapis.com/AccessLevel,storage.googleapis.com/Bucket" \
   --content-type=resource \
   --bigquery-table="${FULLY_QUALIFIED_TABLE}" \
   --output-bigquery-force 2>&1)
