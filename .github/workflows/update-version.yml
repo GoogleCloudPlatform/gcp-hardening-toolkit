@@ -24,7 +24,7 @@ jobs:
         id: check_bump
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }}
-          
+
           if git log origin/${{ github.event.pull_request.base.ref }}..HEAD --grep="chore: bump extension version" | grep -q "chore:"; then
             echo "skip=true" >> $GITHUB_OUTPUT
           else
