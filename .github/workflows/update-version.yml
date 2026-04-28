@@ -30,10 +30,10 @@ jobs:
         run: |
           BASE_VERSION=$(jq -r '.version' base/gemini-extension.json)
           PR_VERSION=$(jq -r '.version' pr/gemini-extension.json)
-          
+
           echo "Base branch version: $BASE_VERSION"
           echo "PR branch version:   $PR_VERSION"
-          
+
           if [ "$BASE_VERSION" == "$PR_VERSION" ]; then
             echo "bumped=false" >> $GITHUB_OUTPUT
           else
@@ -48,4 +48,4 @@ jobs:
         run: |
           gh pr comment $PR_URL -b "🛑 **Integrity Alert:** You modified agent files, but did not update the version in \`gemini-extension.json\`. Please increment the version in your local branch, commit, and push the changes to unblock this PR."
           echo "Error: Version was not incremented."
-          exit 1 
+          exit 1
