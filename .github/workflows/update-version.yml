@@ -1,4 +1,4 @@
-name: Update Extension Version
+name: Enforce Extension Version Bump
 
 on:
   pull_request:
@@ -8,42 +8,44 @@ on:
       - '.gemini/**'
 
 jobs:
-  update-version:
+  verify-version:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      pull-requests: write # Strict permission just to leave a PR comment
     steps:
-      - name: Checkout code
+      - name: Checkout target branch (base)
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
-          token: ${{ secrets.BOT_PAT }}
+          ref: ${{ github.event.pull_request.base.ref }}
+          path: base
 
-      - name: Idempotency Check
-        id: check_bump
+      - name: Checkout PR branch (head)
+        uses: actions/checkout@v4
+        with:
+          path: pr
+
+      - name: Compare versions
+        id: compare
         run: |
-          git fetch origin ${{ github.event.pull_request.base.ref }}
-
-          if git log origin/${{ github.event.pull_request.base.ref }}..HEAD --grep="chore: bump extension version" | grep -q "chore:"; then
-            echo "skip=true" >> $GITHUB_OUTPUT
+          BASE_VERSION=$(jq -r '.version' base/gemini-extension.json)
+          PR_VERSION=$(jq -r '.version' pr/gemini-extension.json)
+          
+          echo "Base branch version: $BASE_VERSION"
+          echo "PR branch version:   $PR_VERSION"
+          
+          if [ "$BASE_VERSION" == "$PR_VERSION" ]; then
+            echo "bumped=false" >> $GITHUB_OUTPUT
           else
-            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "bumped=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Increment version in gemini-extension.json
-        if: steps.check_bump.outputs.skip == 'false'
+      - name: Reject and Comment
+        if: steps.compare.outputs.bumped == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
-          jq '.version |= (split(".") | .[2] |= (tonumber + 1 | tostring) | join("."))' gemini-extension.json > temp.json && mv temp.json gemini-extension.json
-
-      - name: Commit and push changes
-        if: steps.check_bump.outputs.skip == 'false'
-        run: |
-          git config --global user.name 'ght-bot'
-          git config --global user.email '276627191+ght-bot@users.noreply.github.com'
-          git add gemini-extension.json
-          if ! git diff --staged --quiet; then
-            git commit -m "chore: bump extension version"
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
-          fi
+          gh pr comment $PR_URL -b "🛑 **Integrity Alert:** You modified agent files, but did not update the version in \`gemini-extension.json\`. Please increment the version in your local branch, commit, and push the changes to unblock this PR."
+          echo "Error: Version was not incremented."
+          exit 1 
