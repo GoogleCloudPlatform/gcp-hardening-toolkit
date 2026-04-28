@@ -1,22 +1,7 @@
 {
   "name": "hardening-agent",
   "description": "A specialized security assistant for GCP hardening and blueprint generation.",
-  "version": "1.1.0",
+  "version": "1.1.5",
   "contextFileName": "./agent/GEMINI.md",
-  "mcpServers": {
-    "bigquery": {
-      "description": "Hosted BigQuery MCP server for security telemetry and asset inventory.",
-      "httpUrl": "https://bigquery.googleapis.com/mcp",
-      "authProviderType": "google_credentials",
-      "oauth": {
-        "scopes": [
-          "https://www.googleapis.com/auth/bigquery"
-        ]
-      },
-      "env": {
-        "GOOGLE_CLOUD_PROJECT": "$GOOGLE_CLOUD_PROJECT"
-      },
-      "timeout": 30000
-    }
-  }
+  "mcpServers": {}
 }

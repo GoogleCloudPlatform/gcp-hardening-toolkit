@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "storage": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@google-cloud/storage-mcp"
+      ],
+      "env": {
+        "GOOGLE_CLOUD_PROJECT": "$GOOGLE_CLOUD_PROJECT"
+      }
+    },
+    "bigquery": {
+      "description": "Hosted BigQuery MCP server for security telemetry and asset inventory.",
+      "httpUrl": "https://bigquery.googleapis.com/mcp",
+      "authProviderType": "google_credentials",
+      "oauth": {
+        "scopes": [
+          "https://www.googleapis.com/auth/bigquery"
+        ]
+      },
+      "env": {
+        "GOOGLE_CLOUD_PROJECT": "$GOOGLE_CLOUD_PROJECT"
+      },
+      "timeout": 30000
+    }
+  }
+}
