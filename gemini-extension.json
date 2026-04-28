@@ -1,7 +1,7 @@
 {
   "name": "hardening-agent",
   "description": "A specialized security assistant for GCP hardening and blueprint generation.",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "contextFileName": "./agent/GEMINI.md",
   "mcpServers": {}
 }
