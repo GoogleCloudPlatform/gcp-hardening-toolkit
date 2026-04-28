@@ -15,13 +15,13 @@ jobs:
       pull-requests: write # Strict permission just to leave a PR comment
     steps:
       - name: Checkout target branch (base)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.base.ref }}
           path: base
 
       - name: Checkout PR branch (head)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: pr
 
