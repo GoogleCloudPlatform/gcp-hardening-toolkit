@@ -14,10 +14,6 @@ TRUSTED_DOMAINS=(
   "google.com"
 )
 
-# Define color codes for output
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
 # Check if a project ID was provided as an argument.
 if [ -z "$1" ]; then
   echo "Usage: $0 <project-id>"
@@ -83,10 +79,10 @@ for user in $all_users; do
   fi
 done
 
-# Print users logic (highlighted in yellow if any are found)
+# Print users logic (highlighted if any are found)
 if [ -n "$untrusted_users" ]; then
-  echo -e "${YELLOW}External / Untrusted User Accounts Found:${NC}"
-  echo -e "${YELLOW}$(echo -e "$untrusted_users" | sed '/^$/d' | sed 's/^/  - /')${NC}"
+  echo "External / Untrusted User Accounts Found:"
+  echo -e "$(echo -e "$untrusted_users" | sed '/^$/d' | sed 's/^/  - /')"
 else
   echo "External / Untrusted User Accounts: None"
 fi
@@ -102,8 +98,8 @@ privileged_accounts=$(gcloud asset search-all-iam-policies \
   ' | sort -u)
 
 if [ -n "$privileged_accounts" ]; then
-  echo -e "${YELLOW}Privileged Accounts (Owner/Editor) Found:${NC}"
-  echo -e "${YELLOW}$(echo "$privileged_accounts" | sed '/^$/d' | sed 's/^/  - /')${NC}"
+  echo "Privileged Accounts (Owner/Editor) Found:"
+  echo "$(echo "$privileged_accounts" | sed '/^$/d' | sed 's/^/  - /')"
 else
   echo "Privileged Accounts (Owner/Editor): None"
 fi
@@ -120,7 +116,7 @@ echo "========================================"
 default_vpc=$(gcloud compute networks list --project="$projectId" --filter="name=default" --format="value(name)")
 
 if [ "$default_vpc" == "default" ]; then
-  echo -e "${YELLOW}Default VPC Found: true${NC}"
+  echo "Default VPC Found: true"
 else
   echo "Default VPC Found: false"
 fi
@@ -129,7 +125,7 @@ fi
 vpc_count=$(gcloud compute networks list --project="$projectId" --format="value(name)" | wc -l | xargs)
 
 if [ "$vpc_count" -gt 1 ]; then
-  echo -e "${YELLOW}Total VPC Networks: $vpc_count${NC}"
+  echo "Total VPC Networks: $vpc_count"
 else
   echo "Total VPC Networks: $vpc_count"
 fi
@@ -150,8 +146,8 @@ fw_allow_all_ips=$(gcloud compute firewall-rules list \
 
 # Print open ports logic
 if [ -n "$fw_allow_all_ips" ]; then
-  echo -e "${YELLOW}Open to the internet (0.0.0.0/0):${NC}"
-  echo -e "${YELLOW}$(echo "$fw_allow_all_ips" | sed '/^$/d' | sed 's/^/  - /')${NC}"
+  echo "Open to the internet (0.0.0.0/0):"
+  echo "$(echo "$fw_allow_all_ips" | sed '/^$/d' | sed 's/^/  - /')"
 else
   echo "Open to the internet (0.0.0.0/0): None"
 fi
@@ -185,7 +181,7 @@ for network in $networks; do
   if [ "$is_private_dns_enabled" = "ENABLED" ]; then
     echo "  - $network: ENABLED"
   else
-    echo -e "${YELLOW}  - $network: DISABLED${NC}"
+    echo "  - $network: DISABLED"
   fi
 done
 
@@ -204,7 +200,7 @@ for network in $networks; do
   if [ "$dnssec_status" = "ENABLED" ]; then
     echo "  - $network: ENABLED"
   else
-    echo -e "${YELLOW}  - $network: DISABLED${NC}"
+    echo "  - $network: DISABLED"
   fi
 done
 
@@ -229,10 +225,229 @@ for sa in $service_accounts; do
 done
 
 if [ -n "$all_sa_keys" ]; then
-  echo -e "${YELLOW}Service Account Keys Found:${NC}"
-  echo -e "${YELLOW}$(echo -e "$all_sa_keys" | sed '/^$/d' | sed 's/^/  - /')${NC}"
+  echo "Service Account Keys Found:"
+  echo -e "$(echo -e "$all_sa_keys" | sed '/^$/d' | sed 's/^/  - /')"
 else
   echo "Service Account Keys: None"
+fi
+
+# ==========================================
+# Section 5: Public Resource Exposure
+# ==========================================
+echo ""
+echo "========================================"
+echo "Public Resource Exposure:"
+echo "========================================"
+
+# Public GCS Buckets
+echo "Public GCS Buckets (allUsers / allAuthenticatedUsers):"
+public_buckets=$(gcloud asset search-all-iam-policies \
+  --scope=projects/${projectId} \
+  --asset-types=storage.googleapis.com/Bucket \
+  --query="policy:(allUsers OR allAuthenticatedUsers)" \
+  --format="value(resource)" 2>/dev/null)
+
+if [ -n "$public_buckets" ]; then
+  echo "$public_buckets" | sed 's/^/  - /'
+else
+  echo "  - None"
+fi
+
+# Public BigQuery Datasets
+echo "Public BigQuery Datasets (allUsers / allAuthenticatedUsers):"
+public_bq=$(gcloud asset search-all-iam-policies \
+  --scope=projects/${projectId} \
+  --asset-types=bigquery.googleapis.com/Dataset \
+  --query="policy:(allUsers OR allAuthenticatedUsers)" \
+  --format="value(resource)" 2>/dev/null)
+
+if [ -n "$public_bq" ]; then
+  echo "$public_bq" | sed 's/^/  - /'
+else
+  echo "  - None"
+fi
+
+# ==========================================
+# Section 6: Infrastructure Exposure
+# ==========================================
+echo ""
+echo "========================================"
+echo "Infrastructure Exposure:"
+echo "========================================"
+
+# Compute Instances with External IPs
+echo "Compute Instances with External IPs:"
+instances_ext_ip=$(gcloud compute instances list --project="$projectId" \
+  --format="table[no-heading](name, networkInterfaces[].accessConfigs[0].natIP)" | grep -v "None" | awk '{print $1 " (" $2 ")"}')
+
+if [ -n "$instances_ext_ip" ]; then
+  echo "$instances_ext_ip" | sed 's/^/  - /'
+else
+  echo "  - None"
+fi
+
+# Cloud SQL Public IPs
+echo "Cloud SQL Instances with Public IP Enabled:"
+sql_public_ips=$(gcloud sql instances list --project="$projectId" \
+  --format="value(name)" --filter="settings.ipConfiguration.ipv4Enabled=true")
+
+if [ -n "$sql_public_ips" ]; then
+  echo "$sql_public_ips" | sed 's/^/  - /'
+else
+  echo "  - None"
+fi
+
+# ==========================================
+# Section 7: Service Account Hardening
+# ==========================================
+echo ""
+echo "========================================"
+echo "Service Account Hardening:"
+echo "========================================"
+
+# Default Service Account Usage (Compute)
+echo "Compute Instances using Default Service Account:"
+default_sa_instances=$(gcloud compute instances list --project="$projectId" \
+  --format="value(name)" --filter="serviceAccounts.email ~ .*compute@developer.gserviceaccount.com")
+
+if [ -n "$default_sa_instances" ]; then
+  echo "$default_sa_instances" | sed 's/^/  - /'
+else
+  echo "  - None"
+fi
+
+# Old Service Account Keys (Older than 90 days)
+echo "Service Account Keys older than 90 days:"
+current_date_sec=$(date +%s)
+ninety_days_sec=$((90 * 24 * 60 * 60))
+
+# Get all keys and their creation dates
+all_keys_info=$(gcloud iam service-accounts list --project="$projectId" --format="value(email)" | while read sa; do
+  gcloud iam service-accounts keys list --iam-account="$sa" --project="$projectId" --format="value(name,validAfterTime)"
+done)
+
+found_old_keys=0
+while read -r key_name key_date; do
+  if [ -n "$key_name" ] && [ -n "$key_date" ]; then
+    # Parse ISO 8601 date to seconds (requires GNU date or compatible)
+    key_date_sec=$(date -d "$key_date" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$key_date" +%s 2>/dev/null)
+    if [ -n "$key_date_sec" ]; then
+      age_sec=$((current_date_sec - key_date_sec))
+      if [ "$age_sec" -gt "$ninety_days_sec" ]; then
+        echo "  - $key_name (Created: $key_date)"
+        found_old_keys=1
+      fi
+    fi
+  fi
+done <<< "$all_keys_info"
+
+if [ "$found_old_keys" -eq 0 ]; then
+  echo "  - None"
+fi
+
+# ==========================================
+# Section 8: Serverless & Artifact Exposure
+# ==========================================
+echo ""
+echo "========================================"
+echo "Serverless & Artifact Exposure:"
+echo "========================================"
+
+# Public Cloud Run Services
+echo "Public Cloud Run Services (Unauthenticated Access):"
+public_run=$(gcloud asset search-all-iam-policies \
+  --scope=projects/${projectId} \
+  --asset-types=run.googleapis.com/Service \
+  --query="policy:(allUsers OR allAuthenticatedUsers)" \
+  --format="value(resource)" 2>/dev/null)
+
+if [ -n "$public_run" ]; then
+  echo "$public_run" | sed 's/^/  - /'
+else
+  echo "  - None"
+fi
+
+# Public Cloud Functions
+echo "Public Cloud Functions (Unauthenticated Access):"
+public_functions=$(gcloud asset search-all-iam-policies \
+  --scope=projects/${projectId} \
+  --asset-types=cloudfunctions.googleapis.com/Function \
+  --query="policy:(allUsers OR allAuthenticatedUsers)" \
+  --format="value(resource)" 2>/dev/null)
+
+if [ -n "$public_functions" ]; then
+  echo "$public_functions" | sed 's/^/  - /'
+else
+  echo "  - None"
+fi
+
+# Public Artifact Registry Repositories
+echo "Public Artifact Registry Repositories:"
+public_ar=$(gcloud asset search-all-iam-policies \
+  --scope=projects/${projectId} \
+  --asset-types=artifactregistry.googleapis.com/Repository \
+  --query="policy:(allUsers OR allAuthenticatedUsers)" \
+  --format="value(resource)" 2>/dev/null)
+
+if [ -n "$public_ar" ]; then
+  echo "$public_ar" | sed 's/^/  - /'
+else
+  echo "  - None"
+fi
+
+# ==========================================
+# Section 9: Network Visibility (Flow Logs)
+# ==========================================
+echo ""
+echo "========================================"
+echo "Network Visibility (Flow Logs):"
+echo "========================================"
+
+# Checking Flow Logs for all subnets
+echo "VPC Subnets with Flow Logs DISABLED:"
+disabled_flow_logs=$(gcloud compute networks subnets list --project="$projectId" \
+  --format="value(name,region,network)" --filter="logConfig.enable=false OR logConfig.enable:null")
+
+if [ -n "$disabled_flow_logs" ]; then
+  echo "$disabled_flow_logs" | while read -r name region network; do
+    echo "  - $name ($region) in VPC: $network"
+  done
+else
+  echo "  - All subnets have Flow Logs enabled."
+fi
+
+# ==========================================
+# Section 10: VM-Level Hardening
+# ==========================================
+echo ""
+echo "========================================"
+echo "VM-Level Hardening:"
+echo "========================================"
+
+# Project-wide SSH Keys Check
+echo "Project-wide SSH Keys Enabled:"
+block_project_ssh=$(gcloud compute project-info describe --project="$projectId" \
+  --format="json" | jq -r '.commonInstanceMetadata.items[]? | select(.key=="block-project-ssh-keys") | .value' 2>/dev/null)
+
+if [ "$block_project_ssh" == "true" ]; then
+  echo "  - Status: DISABLED (Hardened)"
+else
+  echo "  - Status: ENABLED (Risk: Project-level keys can access all VMs)"
+fi
+
+# Serial Port Access Check
+echo "Instances with Serial Port Access ENABLED:"
+serial_port_instances=$(gcloud compute instances list --project="$projectId" \
+  --format="json" 2>/dev/null | jq -r '
+    .[]
+    | select(.metadata.items[]? | select(.key == "serial-port-enable" and (.value == "true" or .value == "1")))
+    | .name
+  ')
+
+if [ -n "$serial_port_instances" ]; then
+  echo "$serial_port_instances" | sed 's/^/  - /'
+else
+  echo "  - None"
 fi
 
 echo ""
@@ -240,6 +455,5 @@ echo "============================================================"
 echo "         GCP Project Security Triage - Scan Complete        "
 echo "============================================================"
 echo ""
-echo "Important findings and potential issues are highlighted in yellow."
 echo "Review the output above for a comprehensive security overview."
 echo ""
