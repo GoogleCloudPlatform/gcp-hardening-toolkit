@@ -77,3 +77,13 @@ ehthumbs.db
 venv
 
 ght-agent-generated-blueprint
+
+# Local Workspace for Uncommitted User Inputs and Agent Outputs
+workspace/inputs/*
+!workspace/inputs/.gitkeep
+workspace/outputs/*
+!workspace/outputs/.gitkeep
+
+# Local Agent Scripts (uncommitted)
+agent/scripts/
+
