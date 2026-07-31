@@ -98,7 +98,7 @@ Administrative, directory, SaaS-level settings, or governance procedures that re
 
 ## 3. Disruption Risk & Implementation Impact Hierarchy
 
-To prevent accidental outages or unexpected operational disruptions, all hardening controls—both Terraform and Manual—must evaluate an **Environment Impact Score**. 
+To prevent accidental outages or unexpected operational disruptions, all hardening controls—both Terraform and Manual—must evaluate an **Environment Impact Score**.
 
 > **Impact Definition**: Implementation Impact is measured strictly as **"how much disruptive will this hardening be"** to active production workloads, network traffic, user access, and operational workflows.
 
