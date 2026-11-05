@@ -59,7 +59,7 @@ output "windows_vdi_instances" {
       iam_member             = user_info.iam_member
       internal_ip            = try(google_compute_instance.windows_vdi[instance_name].network_interface[0].network_ip, null)
       iap_rdp_tunnel_command = "gcloud compute start-iap-tunnel ${instance_name} 3389 --local-host-port=localhost:3389 --zone=${var.zone} --project=${var.project_id}"
-      reset_password_command = "gcloud compute reset-windows-password ${instance_name} --zone=${var.zone} --project=${var.project_id}"
+      reset_password_command = "gcloud compute reset-windows-password ${instance_name} --zone=${var.zone} --project=${var.project_id}" # pragma: allowlist secret
     }
   }
 }
