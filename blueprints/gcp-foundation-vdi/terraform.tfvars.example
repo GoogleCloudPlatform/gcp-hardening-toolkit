@@ -1,0 +1,81 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ==============================================================================
+# TERRAFORM INPUT VARIABLES: Enterprise Compute Engine VDI (Example)
+# ==============================================================================
+
+# Target Project ID for VDI deployment
+project_id = "your-vdi-project-id"
+region     = "us-central1"
+zone       = "us-central1-a"
+
+# Networking Configuration (Using provided network)
+subnetwork_project       = "your-host-project-id" # Required if using Shared VPC
+network_name             = "vdi-isolated-vpc"
+subnetwork_name          = "vdi-subnet"
+create_iap_firewall_rule = true
+manage_iap_tunnel_iam    = true
+
+
+# ------------------------------------------------------------------------------
+# Linux VDI Identities (1 VM provisioned per user: <username>-<domain>-vdi)
+# ------------------------------------------------------------------------------
+linux_vdi_users = [
+  "alice@example.com",
+  "bob@example.com"
+]
+
+# Linux Hardware & OS Config
+machine_type      = "e2-standard-4"
+boot_disk_size_gb = 50
+boot_disk_type    = "pd-balanced"
+os_image          = "debian-cloud/debian-12"
+
+# Break-glass sudo on all Linux VDIs (VDI users themselves have NO sudo)
+vdi_admin_members = ["group:vdi-admins@example.com"]
+
+# Admin-managed software, installed by OS Config
+linux_vdi_software = {
+  desktop = {
+    description = "Desktop environment and XRDP remote access"
+    packages    = ["xfce4", "xfce4-goodies", "dbus-x11", "xvfb", "wget", "curl", "xrdp", "chromium"]
+  }
+  dev-tools = {
+    description = "Common CLI tooling for all VDIs"
+    packages    = ["git", "jq", "unzip", "vim"]
+  }
+  data-team = {
+    packages = ["postgresql-client"]
+    users    = ["alice@example.com"]
+  }
+}
+
+linux_vdi_removed_packages = ["telnet"]
+
+# Optional outbound HTTP/HTTPS proxy for APT and Chromium (leave null when using Cloud NAT)
+linux_vdi_proxy_config = null
+
+# ------------------------------------------------------------------------------
+# Windows VDI Identities (1 VM provisioned per user: <username>-<domain>-win-vdi)
+# ------------------------------------------------------------------------------
+windows_vdi_users = [
+  "jane@example.com"
+]
+
+# Windows Hardware & OS Config
+windows_machine_type  = "n2-standard-4"
+windows_disk_size_gb  = 100
+windows_image_family  = "windows-2022"
+windows_image_project = "windows-cloud"
