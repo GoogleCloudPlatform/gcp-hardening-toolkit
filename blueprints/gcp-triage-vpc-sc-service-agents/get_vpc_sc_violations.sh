@@ -45,7 +45,7 @@ echo "Attempting to retrieve all logs from the last 30 days to check for any log
 for project_number in $PROJECT_NUMBERS; do
   PROJECT_ID=$(gcloud projects describe "$project_number" --format="value(projectId)")
   echo "Retrieving all logs for project: $PROJECT_ID (Number: $project_number)"
-  gcloud logging read "timestamp >= \"$(date -v -30d -u +'%Y-%m-%dT%H:%M:%SZ')\"" \
+  gcloud logging read "timestamp >= \"$(date -u -d '30 days ago' +'%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u -v-30d +'%Y-%m-%dT%H:%M:%SZ')\"" \
     --project="$PROJECT_ID" \
     --format=json | jq -c .[] >> vpc_sc_violations.jsonl
 done
