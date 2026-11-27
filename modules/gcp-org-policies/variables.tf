@@ -76,3 +76,19 @@ variable "allowed_vpc_flow_logs_settings" {
   description = "List of allowed VPC Flow Logs settings. Use predefined values: 'ESSENTIAL' (10-50% sampling), 'LIGHT' (50-100% sampling), 'COMPREHENSIVE' (100% sampling). Empty list enforces VPC Flow Logs with no specific sampling rate requirement."
   default     = ["ESSENTIAL", "LIGHT", "COMPREHENSIVE"]
 }
+
+# /******************************************
+#   Policy selection
+# *******************************************/
+
+variable "boolean_policies" {
+  type        = list(string)
+  description = "Boolean constraints to enforce, without the 'constraints/' prefix (e.g. 'iam.disableServiceAccountKeyCreation'). When null (default), all supported boolean constraints are enforced. See README.md for the supported list."
+  default     = null
+}
+
+variable "list_policies" {
+  type        = list(string)
+  description = "List constraints to enforce, without the 'constraints/' prefix (e.g. 'compute.vmExternalIpAccess'). When null (default), all supported list constraints are enforced. See README.md for the supported list."
+  default     = null
+}

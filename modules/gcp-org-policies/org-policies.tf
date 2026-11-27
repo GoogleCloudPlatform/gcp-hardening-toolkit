@@ -46,12 +46,30 @@ locals {
     "storage.publicAccessPrevention",
     "compute.requireShieldedVm"
   ])
+
+  # Supported list constraints. Each one is enforced by a dedicated module block below.
+  list_type_organization_policies = toset([
+    "compute.vmExternalIpAccess",
+    "compute.restrictProtocolForwardingCreationForTypes",
+    "iam.allowedPolicyMemberDomains",
+    "compute.trustedImageProjects",
+    "essentialcontacts.allowedContactDomains",
+    "gcp.resourceLocations",
+    "compute.restrictNonConfidentialComputing",
+    "gcp.restrictNonCmekServices",
+    "compute.requireVpcFlowLogs"
+  ])
+
+  # Policies selected by the caller. null (default) enforces every supported policy,
+  # which keeps the behavior of existing callers unchanged.
+  selected_boolean_policies = var.boolean_policies == null ? local.boolean_type_organization_policies : toset(var.boolean_policies)
+  selected_list_policies    = var.list_policies == null ? local.list_type_organization_policies : toset(var.list_policies)
 }
 
 module "organization_policies_type_boolean" {
   source   = "terraform-google-modules/org-policy/google"
   version  = "~> 7.0"
-  for_each = local.boolean_type_organization_policies
+  for_each = local.selected_boolean_policies
 
   organization_id = local.organization_id
   folder_id       = local.folder_id
@@ -66,6 +84,7 @@ module "organization_policies_type_boolean" {
 # *******************************************/
 
 module "org_vm_external_ip_access" {
+  count   = contains(local.selected_list_policies, "compute.vmExternalIpAccess") ? 1 : 0
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 7.0"
 
@@ -81,6 +100,7 @@ module "org_vm_external_ip_access" {
 }
 
 module "restrict_protocol_fowarding" {
+  count   = contains(local.selected_list_policies, "compute.restrictProtocolForwardingCreationForTypes") ? 1 : 0
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 7.0"
 
@@ -98,7 +118,7 @@ module "restrict_protocol_fowarding" {
 # *******************************************/
 
 module "org_domain_restricted_sharing" {
-  count   = length(var.domains_to_allow) > 0 ? 1 : 0
+  count   = contains(local.selected_list_policies, "iam.allowedPolicyMemberDomains") && length(var.domains_to_allow) > 0 ? 1 : 0
   source  = "terraform-google-modules/org-policy/google//modules/domain_restricted_sharing"
   version = "~> 7.0"
 
@@ -113,6 +133,7 @@ module "org_domain_restricted_sharing" {
 # *******************************************/
 
 module "org_trusted_image_projects" {
+  count   = contains(local.selected_list_policies, "compute.trustedImageProjects") ? 1 : 0
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 7.0"
 
@@ -130,6 +151,7 @@ module "org_trusted_image_projects" {
 # *******************************************/
 
 module "restrict_contact_domains" {
+  count   = contains(local.selected_list_policies, "essentialcontacts.allowedContactDomains") ? 1 : 0
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 7.1"
 
@@ -147,6 +169,7 @@ module "restrict_contact_domains" {
 *******************************************/
 
 module "resource_location_restriction" {
+  count   = contains(local.selected_list_policies, "gcp.resourceLocations") ? 1 : 0
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 7.4.0"
 
@@ -164,6 +187,7 @@ module "resource_location_restriction" {
 *******************************************/
 
 module "restrict_non_confidential_computing" {
+  count   = contains(local.selected_list_policies, "compute.restrictNonConfidentialComputing") ? 1 : 0
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 7.4.0"
 
@@ -181,6 +205,7 @@ module "restrict_non_confidential_computing" {
 *******************************************/
 
 module "restrict_non_cmek_services" {
+  count   = contains(local.selected_list_policies, "gcp.restrictNonCmekServices") ? 1 : 0
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 7.4.0"
 
@@ -198,6 +223,7 @@ module "restrict_non_cmek_services" {
 *******************************************/
 
 module "require_vpc_flow_logs" {
+  count   = contains(local.selected_list_policies, "compute.requireVpcFlowLogs") ? 1 : 0
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 7.4.0"
 
@@ -208,4 +234,54 @@ module "require_vpc_flow_logs" {
   allow             = var.allowed_vpc_flow_logs_settings
   allow_list_length = length(var.allowed_vpc_flow_logs_settings)
   constraint        = "constraints/compute.requireVpcFlowLogs"
+}
+
+/******************************************
+  State migration
+*******************************************/
+
+# These module blocks gained a `count` meta-argument so they can be selected
+# through var.list_policies. The moved blocks map their previous addresses to
+# the new ones, so existing deployments keep their policies instead of
+# destroying and recreating them. org_domain_restricted_sharing already used
+# `count`, so its address did not change.
+
+moved {
+  from = module.org_vm_external_ip_access
+  to   = module.org_vm_external_ip_access[0]
+}
+
+moved {
+  from = module.restrict_protocol_fowarding
+  to   = module.restrict_protocol_fowarding[0]
+}
+
+moved {
+  from = module.org_trusted_image_projects
+  to   = module.org_trusted_image_projects[0]
+}
+
+moved {
+  from = module.restrict_contact_domains
+  to   = module.restrict_contact_domains[0]
+}
+
+moved {
+  from = module.resource_location_restriction
+  to   = module.resource_location_restriction[0]
+}
+
+moved {
+  from = module.restrict_non_confidential_computing
+  to   = module.restrict_non_confidential_computing[0]
+}
+
+moved {
+  from = module.restrict_non_cmek_services
+  to   = module.restrict_non_cmek_services[0]
+}
+
+moved {
+  from = module.require_vpc_flow_logs
+  to   = module.require_vpc_flow_logs[0]
 }
